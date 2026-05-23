@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 
 import { Upload } from "lucide-react";
@@ -61,7 +62,7 @@ export function PaymentProofForm({
 
   return (
     <form action={action} className="grid gap-3">
-      <label className="text-sm font-medium text-[color:var(--st-text)]">
+      <label className="text-sm font-medium text-(--st-text)">
         Upload payment proof
       </label>
 
@@ -71,11 +72,11 @@ export function PaymentProofForm({
           {error ? (
             <div className="text-xs text-[#B91C1C]">{error}</div>
           ) : preview ? (
-            <div className="text-xs text-[color:var(--st-text-muted)]">
-              Selected: <span className="font-medium text-[color:var(--st-text)]">{preview.name}</span> ({formatBytes(preview.size)})
+            <div className="text-xs text-(--st-text-muted)">
+              Selected: <span className="font-medium text-(--st-text)">{preview.name}</span> ({formatBytes(preview.size)})
             </div>
           ) : (
-            <div className="text-xs text-[color:var(--st-text-muted)]">
+            <div className="text-xs text-(--st-text-muted)">
               Please upload a screenshot from your banking/e-wallet app.
             </div>
           )}
@@ -92,14 +93,21 @@ export function PaymentProofForm({
       </div>
 
       {preview ? (
-        <div className="mt-1 overflow-hidden rounded-lg border border-[color:var(--st-border)] bg-white">
-          <div className="aspect-video bg-[#F7F8FA]">
-            <img src={preview.url} alt={preview.name} className="h-full w-full object-contain" />
+        <div className="mt-1 overflow-hidden rounded-lg border border-(--st-border) bg-white">
+          <div className="relative aspect-video bg-[#F7F8FA]">
+            <Image
+              src={preview.url}
+              alt={preview.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 480px"
+              className="object-contain"
+              unoptimized
+            />
           </div>
         </div>
       ) : null}
 
-      <p className="text-xs text-[color:var(--st-text-muted)]">
+      <p className="text-xs text-(--st-text-muted)">
         Verification is manual. Your order will be processed after payment is verified.
       </p>
     </form>

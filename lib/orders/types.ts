@@ -22,7 +22,12 @@ export type Order = {
   customer_name: string;
   customer_email: string | null;
   customer_phone: string | null;
-  shipping_address: any;
+  shipping_address: {
+    line1: string;
+    city: string;
+    province: string;
+    postal_code: string;
+  };
   pay_by: string | null;
   admin_note: string | null;
   created_at: string;

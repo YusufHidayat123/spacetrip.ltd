@@ -54,16 +54,45 @@ export async function adminUpdateCategory(
   return data as Category;
 }
 
-export async function adminListProducts() {
+export async function adminListProducts(params?: {
+  q?: string;
+  status?: "draft" | "active" | "all";
+  page?: number;
+  pageSize?: number;
+}) {
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
+
+  const pageSize = Math.min(Math.max(params?.pageSize ?? 20, 1), 100);
+  const page = Math.max(params?.page ?? 1, 1);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
     .from("products")
     .select(
-      "*, categories(id,name,slug), product_images(id,storage_path,sort_order), product_variants(id,size_label,stock,is_active)"
+      "id,category_id,name,slug,price,status,created_at,updated_at,categories(id,name,slug),product_images(id,storage_path,sort_order),product_variants(id,size_label,stock,is_active)",
+      { count: "exact" }
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (params?.status && params.status !== "all") {
+    query = query.eq("status", params.status);
+  }
+
+  if (params?.q && params.q.trim().length > 0) {
+    query = query.ilike("name", `%${params.q.trim()}%`);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw error;
-  return data ?? [];
+
+  return {
+    data: data ?? [],
+    count: count ?? 0,
+    page,
+    pageSize,
+  };
 }
 
 export async function adminCreateProduct(input: {

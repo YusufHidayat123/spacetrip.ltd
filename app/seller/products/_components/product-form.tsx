@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 
 import { Plus, Trash2, Upload } from "lucide-react";
@@ -53,9 +54,10 @@ export function ProductForm({
   const [imageWarning, setImageWarning] = React.useState<string | null>(null);
   const [imageSizeError, setImageSizeError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (!slugTouched) setSlug(slugify(name));
-  }, [name, slugTouched]);
+  function onNameChange(next: string) {
+    setName(next);
+    if (!slugTouched) setSlug(slugify(next));
+  }
 
   React.useEffect(() => {
     return () => {
@@ -127,20 +129,20 @@ export function ProductForm({
     <form action={action} className="grid gap-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Product name
           </label>
           <Input
             name="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => onNameChange(e.target.value)}
             placeholder="Spacetrip Basic Tee 180gsm"
             required
           />
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Slug
           </label>
           <Input
@@ -156,7 +158,7 @@ export function ProductForm({
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Category
           </label>
           <input type="hidden" name="category_id" value={categoryId} />
@@ -173,14 +175,14 @@ export function ProductForm({
             </SelectContent>
           </Select>
           {categories.length === 0 ? (
-            <p className="text-xs text-[color:var(--st-text-muted)]">
+            <p className="text-xs text-(--st-text-muted)">
               Create a category first.
             </p>
           ) : null}
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Status
           </label>
           <input type="hidden" name="status" value={status} />
@@ -199,7 +201,7 @@ export function ProductForm({
         </div>
 
         <div className="grid gap-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Price (IDR)
           </label>
           <Input
@@ -211,13 +213,13 @@ export function ProductForm({
             placeholder="149000"
             required
           />
-          <p className="text-xs text-[color:var(--st-text-muted)]">
+          <p className="text-xs text-(--st-text-muted)">
             Stored as numeric. Use plain number without separators.
           </p>
         </div>
 
         <div className="grid gap-2 md:col-span-2">
-          <label className="text-sm font-medium text-[color:var(--st-text)]">
+          <label className="text-sm font-medium text-(--st-text)">
             Description
           </label>
           <Textarea
@@ -227,13 +229,13 @@ export function ProductForm({
         </div>
       </div>
 
-      <div className="rounded-lg border border-[color:var(--st-border)] p-4">
+      <div className="rounded-lg border border-(--st-border) p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold text-[color:var(--st-text)]">
+            <div className="text-sm font-semibold text-(--st-text)">
               Sizes & stock
             </div>
-            <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+            <div className="mt-1 text-xs text-(--st-text-muted)">
               Add size labels freely (S/M/L, 42, One Size). Stock is per size.
             </div>
           </div>
@@ -244,7 +246,7 @@ export function ProductForm({
         </div>
 
         <div className="mt-4 grid gap-2">
-          <div className="grid grid-cols-[1fr_140px_44px] gap-2 text-xs font-medium text-[color:var(--st-text-muted)]">
+          <div className="grid grid-cols-[1fr_140px_44px] gap-2 text-xs font-medium text-(--st-text-muted)">
             <div className="px-1">Size</div>
             <div className="px-1">Stock</div>
             <div />
@@ -287,11 +289,11 @@ export function ProductForm({
         </div>
       </div>
 
-      <div className="rounded-lg border border-[color:var(--st-border)] p-4">
-        <div className="text-sm font-semibold text-[color:var(--st-text)]">
+      <div className="rounded-lg border border-(--st-border) p-4">
+        <div className="text-sm font-semibold text-(--st-text)">
           Images
         </div>
-        <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+        <div className="mt-1 text-xs text-(--st-text-muted)">
           Upload up to 5 images. Recommended: WebP/JPG, square-ish framing.
         </div>
         {imageWarning ? (
@@ -302,7 +304,7 @@ export function ProductForm({
         ) : null}
 
         <div className="mt-4">
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-[color:var(--st-border)] bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-[color:var(--st-text)] hover:bg-[#F7F8FA]/70">
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-(--st-border) bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-(--st-text) hover:bg-[#F7F8FA]/70">
             <Upload className="h-4 w-4" />
             Choose files
             <input
@@ -321,20 +323,23 @@ export function ProductForm({
             {imagePreviews.map((p) => (
               <div
                 key={p.url}
-                className="overflow-hidden rounded-md border border-[color:var(--st-border)] bg-white"
+                className="overflow-hidden rounded-md border border-(--st-border) bg-white"
               >
-                <div className="aspect-square w-full bg-[#F7F8FA]">
-                  <img
+                <div className="relative aspect-square w-full bg-[#F7F8FA]">
+                  <Image
                     src={p.url}
                     alt={p.name}
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="160px"
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
                 <div className="p-2">
-                  <div className="truncate text-xs font-medium text-[color:var(--st-text)]">
+                  <div className="truncate text-xs font-medium text-(--st-text)">
                     {p.name}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[color:var(--st-text-muted)]">
+                  <div className="mt-0.5 text-[11px] text-(--st-text-muted)">
                     {formatBytes(p.size)}
                   </div>
                 </div>
@@ -342,7 +347,7 @@ export function ProductForm({
             ))}
           </div>
         ) : (
-          <div className="mt-3 text-xs text-[color:var(--st-text-muted)]">
+          <div className="mt-3 text-xs text-(--st-text-muted)">
             No images selected.
           </div>
         )}

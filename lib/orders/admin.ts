@@ -7,14 +7,22 @@ export async function adminListOrders(params?: {
   q?: string;
   payment_status?: PaymentStatus | "all";
   status?: OrderStatus | "all";
+  page?: number;
+  pageSize?: number;
 }) {
   const supabase = createSupabaseAdminClient();
 
-  // MVP: keep query simple; do filtering in SQL where possible.
+  const pageSize = Math.min(Math.max(params?.pageSize ?? 20, 1), 100);
+  const page = Math.max(params?.page ?? 1, 1);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  // Keep query simple; do filtering in SQL.
   let query = supabase
     .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (params?.payment_status && params.payment_status !== "all") {
     query = query.eq("payment_status", params.payment_status);
@@ -32,9 +40,15 @@ export async function adminListOrders(params?: {
     );
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) throw error;
-  return (data ?? []) as Order[];
+
+  return {
+    data: (data ?? []) as Order[],
+    count: count ?? 0,
+    page,
+    pageSize,
+  };
 }
 
 export async function adminGetOrder(orderId: string) {

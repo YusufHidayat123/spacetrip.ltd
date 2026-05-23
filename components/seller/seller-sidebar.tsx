@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BadgeDollarSign,
-  Blocks,
   ClipboardList,
   LayoutGrid,
   LogOut,
@@ -21,7 +20,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 
 type NavItem = {
   label: string;
@@ -30,21 +28,43 @@ type NavItem = {
   badge?: string;
 };
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/seller", icon: LayoutGrid },
-  { label: "Order", href: "/seller/orders", icon: ClipboardList, badge: "10" },
-  {
-    label: "Transaction",
-    href: "/seller/transactions",
-    icon: BadgeDollarSign,
-    badge: "12",
-  },
-  { label: "Catalog", href: "/seller/products", icon: ShoppingBag },
-  { label: "Category", href: "/seller/categories", icon: Shapes },
-  { label: "Setting", href: "/seller/settings", icon: Settings },
-];
+type SidebarCounts = {
+  totalOrders: number;
+  newOrders: number;
+  paymentToReview: number;
+};
 
-export function SellerSidebar() {
+function getNavItems(counts: SidebarCounts): NavItem[] {
+  return [
+    { label: "Dashboard", href: "/seller", icon: LayoutGrid },
+    {
+      label: "Order",
+      href: "/seller/orders",
+      icon: ClipboardList,
+      // Show new orders as a badge (most actionable)
+      badge: counts.newOrders > 0 ? String(counts.newOrders) : undefined,
+    },
+    {
+      label: "Transaction",
+      href: "/seller/transactions",
+      icon: BadgeDollarSign,
+      // Since payments are manual, this is the closest signal we have.
+      badge:
+        counts.paymentToReview > 0
+          ? String(counts.paymentToReview)
+          : undefined,
+    },
+    { label: "Catalog", href: "/seller/products", icon: ShoppingBag },
+    { label: "Category", href: "/seller/categories", icon: Shapes },
+    { label: "Setting", href: "/seller/settings", icon: Settings },
+  ];
+}
+
+export function SellerSidebar({
+  counts,
+}: {
+  counts: SidebarCounts;
+}) {
   const pathname = usePathname();
 
   return (
@@ -79,7 +99,7 @@ export function SellerSidebar() {
 
         <nav className="mt-4 flex-1 px-2">
           <div className="space-y-1">
-            {navItems.map((item) => {
+            {getNavItems(counts).map((item) => {
               const active =
                 item.href === "/seller"
                   ? pathname === item.href
@@ -132,27 +152,6 @@ export function SellerSidebar() {
 
           <div className="mt-4 px-2">
             <Separator />
-          </div>
-
-          <div className="mt-4 px-2">
-            <div className="flex items-center gap-3 rounded-md px-3 py-2 text-xs font-medium text-[color:var(--st-text-muted)]">
-              <Blocks className="h-4 w-4" />
-              <span>Workspace</span>
-            </div>
-            <div className="mt-1 space-y-1">
-              <Link
-                href="/seller/team"
-                className="flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium text-[color:var(--st-text-muted)] transition-colors hover:bg-[#F7F8FA] hover:text-[color:var(--st-text)]"
-              >
-                <span className="flex h-5 w-5 items-center justify-center rounded-md border border-[color:var(--st-border)] bg-white text-[11px] font-semibold text-[color:var(--st-text)]">
-                  ST
-                </span>
-                <span className="flex-1">Spacetrip Store</span>
-                <Badge variant="neutral" className="text-[11px]">
-                  Pro
-                </Badge>
-              </Link>
-            </div>
           </div>
         </nav>
 

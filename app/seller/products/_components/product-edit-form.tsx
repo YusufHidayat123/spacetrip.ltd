@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import * as React from "react";
 
 import { Plus, Trash2, Upload } from "lucide-react";
@@ -86,9 +87,10 @@ export function ProductEditForm({
   const [imageWarning, setImageWarning] = React.useState<string | null>(null);
   const [imageSizeError, setImageSizeError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (!slugTouched) setSlug(slugify(name));
-  }, [name, slugTouched]);
+  function onNameChange(next: string) {
+    setName(next);
+    if (!slugTouched) setSlug(slugify(next));
+  }
 
   React.useEffect(() => {
     return () => {
@@ -183,13 +185,13 @@ export function ProductEditForm({
       ))}
 
       {/* Images at top */}
-      <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6">
+      <section className="rounded-xl border border-(--st-border) bg-white p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-sm font-semibold text-[color:var(--st-text)]">
+            <div className="text-sm font-semibold text-(--st-text)">
               Product images
             </div>
-            <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+            <div className="mt-1 text-xs text-(--st-text-muted)">
               Existing images are shown first. You can remove them and upload new ones.
             </div>
           </div>
@@ -197,24 +199,26 @@ export function ProductEditForm({
 
         <div className="mt-4 flex flex-wrap gap-3">
           {existingImagesVisible.length === 0 ? (
-            <div className="text-xs text-[color:var(--st-text-muted)]">
+            <div className="text-xs text-(--st-text-muted)">
               No images uploaded yet.
             </div>
           ) : (
             existingImagesVisible.map((img) => (
               <div
                 key={img.id}
-                className="w-[140px] overflow-hidden rounded-lg border border-[color:var(--st-border)] bg-white"
+                className="w-[140px] overflow-hidden rounded-lg border border-(--st-border) bg-white"
               >
-                <div className="aspect-square bg-[#F7F8FA]">
-                  <img
+                <div className="relative aspect-square bg-[#F7F8FA]">
+                  <Image
                     src={img.url}
-                    alt=""
-                    className="h-full w-full object-cover"
+                    alt="Product image"
+                    fill
+                    sizes="140px"
+                    className="object-cover"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-2 p-2">
-                  <div className="truncate text-[11px] text-[color:var(--st-text-muted)]">
+                  <div className="truncate text-[11px] text-(--st-text-muted)">
                     {img.sort_order === 0 ? "Primary" : `#${img.sort_order + 1}`}
                   </div>
                   <Button
@@ -234,10 +238,10 @@ export function ProductEditForm({
         </div>
 
         <div className="mt-5">
-          <div className="text-sm font-semibold text-[color:var(--st-text)]">
+          <div className="text-sm font-semibold text-(--st-text)">
             Upload new images
           </div>
-          <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+          <div className="mt-1 text-xs text-(--st-text-muted)">
             Upload up to 5 images per update.
           </div>
           {imageWarning ? (
@@ -248,7 +252,7 @@ export function ProductEditForm({
           ) : null}
 
           <div className="mt-3">
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-[color:var(--st-border)] bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-[color:var(--st-text)] hover:bg-[#F7F8FA]/70">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-(--st-border) bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-(--st-text) hover:bg-[#F7F8FA]/70">
               <Upload className="h-4 w-4" />
               Choose files
               <input
@@ -267,20 +271,23 @@ export function ProductEditForm({
               {imagePreviews.map((p) => (
                 <div
                   key={p.url}
-                  className="overflow-hidden rounded-md border border-[color:var(--st-border)] bg-white"
+                  className="overflow-hidden rounded-md border border-(--st-border) bg-white"
                 >
-                  <div className="aspect-square w-full bg-[#F7F8FA]">
-                    <img
+                  <div className="relative aspect-square w-full bg-[#F7F8FA]">
+                    <Image
                       src={p.url}
                       alt={p.name}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="160px"
+                      className="object-cover"
+                      unoptimized
                     />
                   </div>
                   <div className="p-2">
-                    <div className="truncate text-xs font-medium text-[color:var(--st-text)]">
+                    <div className="truncate text-xs font-medium text-(--st-text)">
                       {p.name}
                     </div>
-                    <div className="mt-0.5 text-[11px] text-[color:var(--st-text-muted)]">
+                    <div className="mt-0.5 text-[11px] text-(--st-text-muted)">
                       {formatBytes(p.size)}
                     </div>
                   </div>
@@ -292,26 +299,26 @@ export function ProductEditForm({
       </section>
 
       {/* Product fields */}
-      <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6">
-        <div className="text-sm font-semibold text-[color:var(--st-text)]">
+      <section className="rounded-xl border border-(--st-border) bg-white p-6">
+        <div className="text-sm font-semibold text-(--st-text)">
           Product info
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Product name
             </label>
             <Input
               name="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => onNameChange(e.target.value)}
               required
             />
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Slug
             </label>
             <Input
@@ -326,7 +333,7 @@ export function ProductEditForm({
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Category
             </label>
             <Select value={categoryId} onValueChange={setCategoryId}>
@@ -344,7 +351,7 @@ export function ProductEditForm({
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Status
             </label>
             <Select
@@ -362,7 +369,7 @@ export function ProductEditForm({
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Price (IDR)
             </label>
             <Input
@@ -377,7 +384,7 @@ export function ProductEditForm({
           </div>
 
           <div className="grid gap-2 md:col-span-2">
-            <label className="text-sm font-medium text-[color:var(--st-text)]">
+            <label className="text-sm font-medium text-(--st-text)">
               Description
             </label>
             <Textarea
@@ -390,13 +397,13 @@ export function ProductEditForm({
       </section>
 
       {/* Variants */}
-      <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6">
+      <section className="rounded-xl border border-(--st-border) bg-white p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold text-[color:var(--st-text)]">
+            <div className="text-sm font-semibold text-(--st-text)">
               Sizes & stock
             </div>
-            <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+            <div className="mt-1 text-xs text-(--st-text-muted)">
               Stock is per size.
             </div>
           </div>
@@ -407,7 +414,7 @@ export function ProductEditForm({
         </div>
 
         <div className="mt-4 grid gap-2">
-          <div className="grid grid-cols-[1fr_140px_120px_44px] gap-2 text-xs font-medium text-[color:var(--st-text-muted)]">
+          <div className="grid grid-cols-[1fr_140px_120px_44px] gap-2 text-xs font-medium text-(--st-text-muted)">
             <div className="px-1">Size</div>
             <div className="px-1">Stock</div>
             <div className="px-1">Active</div>
@@ -438,13 +445,13 @@ export function ProductEditForm({
                 placeholder="0"
                 required
               />
-              <div className="flex items-center gap-2 rounded-md border border-[color:var(--st-border)] bg-white px-3">
+              <div className="flex items-center gap-2 rounded-md border border-(--st-border) bg-white px-3">
                 <input
                   type="checkbox"
                   checked={v.is_active}
                   onChange={(e) => updateVariant(idx, { is_active: e.target.checked })}
                 />
-                <span className="text-sm text-[color:var(--st-text)]">Active</span>
+                <span className="text-sm text-(--st-text)">Active</span>
                 <input
                   type="hidden"
                   name="variant_is_active"

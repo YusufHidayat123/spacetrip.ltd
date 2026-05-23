@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/seller/breadcrumb";
@@ -7,7 +8,6 @@ import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/form/submit-button";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { adminGetOrder, adminSignPaymentProofUrl, adminUpdateOrder } from "@/lib/orders/admin";
@@ -108,13 +108,13 @@ export default async function SellerOrderDetailPage({
 
       <div className="mt-6 grid gap-6">
         {/* Proofs first (so admin can review quickly) */}
-        <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-[color:var(--st-text)]">
+              <div className="text-sm font-semibold text-(--st-text)">
                 Payment proof
               </div>
-              <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+              <div className="mt-1 text-xs text-(--st-text-muted)">
                 Manual review for QRIS payments.
               </div>
             </div>
@@ -133,7 +133,7 @@ export default async function SellerOrderDetailPage({
                 <Input
                   name="reject_note"
                   placeholder="Reject reason (optional)"
-                  className="h-10 w-[240px]"
+                  className="h-10 w-60"
                 />
                 <SubmitButton
                   pendingText="Rejecting..."
@@ -148,27 +148,29 @@ export default async function SellerOrderDetailPage({
 
           <div className="mt-4 flex flex-wrap gap-3">
             {signedProofs.length === 0 ? (
-              <div className="text-sm text-[color:var(--st-text-muted)]">
+              <div className="text-sm text-(--st-text-muted)">
                 No proof submitted yet.
               </div>
             ) : (
               signedProofs.map((p) => (
                 <div
                   key={p.id}
-                  className="w-[220px] overflow-hidden rounded-xl border border-[color:var(--st-border)] bg-white"
+                  className="w-[220px] overflow-hidden rounded-xl border border-(--st-border) bg-white"
                 >
-                  <div className="aspect-[4/3] bg-[#F7F8FA]">
-                    <img
+                  <div className="relative aspect-[4/3] bg-[#F7F8FA]">
+                    <Image
                       src={p.signed_url}
                       alt={p.original_name ?? "payment proof"}
-                      className="h-full w-full object-contain"
+                      fill
+                      sizes="220px"
+                      className="object-contain"
                     />
                   </div>
                   <div className="p-3">
-                    <div className="truncate text-xs font-medium text-[color:var(--st-text)]">
+                    <div className="truncate text-xs font-medium text-(--st-text)">
                       {p.original_name ?? "proof"}
                     </div>
-                    <div className="mt-1 text-[11px] text-[color:var(--st-text-muted)]">
+                    <div className="mt-1 text-[11px] text-(--st-text-muted)">
                       {formatDateTime(p.created_at)}
                     </div>
                   </div>
@@ -177,18 +179,18 @@ export default async function SellerOrderDetailPage({
             )}
           </div>
 
-          <div className="mt-4 rounded-lg border border-[color:var(--st-border)] bg-[#F7F8FA] p-4 text-sm">
+          <div className="mt-4 rounded-lg border border-(--st-border) bg-[#F7F8FA] p-4 text-sm">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <div>
-                <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+                <div className="text-xs font-medium text-(--st-text-muted)">
                   Order total
                 </div>
-                <div className="mt-1 font-semibold text-[color:var(--st-text)]">
+                <div className="mt-1 font-semibold text-(--st-text)">
                   {formatIDR(order.total_amount)}
                 </div>
               </div>
               <div>
-                <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+                <div className="text-xs font-medium text-(--st-text-muted)">
                   Payment status
                 </div>
                 <div className="mt-1">
@@ -196,10 +198,10 @@ export default async function SellerOrderDetailPage({
                 </div>
               </div>
               <div>
-                <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+                <div className="text-xs font-medium text-(--st-text-muted)">
                   Pay by
                 </div>
-                <div className="mt-1 text-sm text-[color:var(--st-text)]">
+                <div className="mt-1 text-sm text-(--st-text)">
                   {order.pay_by ? formatDateTime(order.pay_by) : "—"}
                 </div>
               </div>
@@ -208,64 +210,64 @@ export default async function SellerOrderDetailPage({
         </section>
 
         {/* Order details */}
-        <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-[color:var(--st-text)]">
+              <div className="text-sm font-semibold text-(--st-text)">
                 Order details
               </div>
-              <div className="mt-1 text-xs text-[color:var(--st-text-muted)]">
+              <div className="mt-1 text-xs text-(--st-text-muted)">
                 Update fulfillment and payment status in one place.
               </div>
             </div>
-            <div className="text-right text-xs text-[color:var(--st-text-muted)]">
+            <div className="text-right text-xs text-(--st-text-muted)">
               Created: {formatDateTime(order.created_at)}
             </div>
           </div>
 
           <form action={updateOrderAction} className="mt-5 grid gap-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-[color:var(--st-border)] p-4">
-                <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+              <div className="rounded-lg border border-(--st-border) p-4">
+                <div className="text-xs font-medium text-(--st-text-muted)">
                   Customer
                 </div>
-                <div className="mt-2 text-sm font-semibold text-[color:var(--st-text)]">
+                <div className="mt-2 text-sm font-semibold text-(--st-text)">
                   {order.customer_name}
                 </div>
-                <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+                <div className="mt-1 text-sm text-(--st-text-muted)">
                   {order.customer_email ?? "—"}
                 </div>
-                <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+                <div className="mt-1 text-sm text-(--st-text-muted)">
                   {order.customer_phone ?? "—"}
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[color:var(--st-border)] p-4">
-                <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+              <div className="rounded-lg border border-(--st-border) p-4">
+                <div className="text-xs font-medium text-(--st-text-muted)">
                   Shipping
                 </div>
-                <div className="mt-2 text-sm text-[color:var(--st-text)]">
+                <div className="mt-2 text-sm text-(--st-text)">
                   {order.shipping_address?.line1 ?? "—"}
                 </div>
-                <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+                <div className="mt-1 text-sm text-(--st-text-muted)">
                   {(order.shipping_address?.city ?? "") +
                     (order.shipping_address?.province
                       ? `, ${order.shipping_address.province}`
                       : "")}
                 </div>
-                <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+                <div className="mt-1 text-sm text-(--st-text-muted)">
                   {order.shipping_address?.postal_code ?? ""}
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <label className="text-sm font-medium text-[color:var(--st-text)]">
+                <label className="text-sm font-medium text-(--st-text)">
                   Payment status
                 </label>
                 <select
                   name="payment_status"
                   defaultValue={order.payment_status}
-                  className="h-10 rounded-md border border-[color:var(--st-border)] bg-white px-3 text-sm text-[color:var(--st-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--st-accent)] focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
                 >
                   <option value="unpaid">unpaid</option>
                   <option value="submitted">submitted</option>
@@ -276,13 +278,13 @@ export default async function SellerOrderDetailPage({
               </div>
 
               <div className="grid gap-2">
-                <label className="text-sm font-medium text-[color:var(--st-text)]">
+                <label className="text-sm font-medium text-(--st-text)">
                   Order status
                 </label>
                 <select
                   name="status"
                   defaultValue={order.status}
-                  className="h-10 rounded-md border border-[color:var(--st-border)] bg-white px-3 text-sm text-[color:var(--st-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--st-accent)] focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
                 >
                   <option value="new">new</option>
                   <option value="processing">processing</option>
@@ -293,7 +295,7 @@ export default async function SellerOrderDetailPage({
               </div>
 
               <div className="md:col-span-2 grid gap-2">
-                <label className="text-sm font-medium text-[color:var(--st-text)]">
+                <label className="text-sm font-medium text-(--st-text)">
                   Admin note
                 </label>
                 <Textarea
@@ -304,10 +306,10 @@ export default async function SellerOrderDetailPage({
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-[color:var(--st-border)]">
+            <div className="overflow-hidden rounded-lg border border-(--st-border)">
               <table className="w-full text-sm">
-                <thead className="border-b border-[color:var(--st-border)]">
-                  <tr className="text-xs font-medium text-[color:var(--st-text-muted)]">
+                <thead className="border-b border-(--st-border)">
+                  <tr className="text-xs font-medium text-(--st-text-muted)">
                     <th className="px-4 py-3 text-left">Product</th>
                     <th className="px-4 py-3 text-left">Variant</th>
                     <th className="px-4 py-3 text-right">Qty</th>
@@ -318,10 +320,10 @@ export default async function SellerOrderDetailPage({
                   {items.map((it) => (
                     <tr
                       key={it.id}
-                      className="border-b border-[color:var(--st-border)] last:border-0"
+                      className="border-b border-(--st-border) last:border-0"
                     >
                       <td className="px-4 py-3 font-medium">{it.product_name}</td>
-                      <td className="px-4 py-3 text-[color:var(--st-text-muted)]">
+                      <td className="px-4 py-3 text-(--st-text-muted)">
                         {it.variant_label}
                       </td>
                       <td className="px-4 py-3 text-right">{it.quantity}</td>

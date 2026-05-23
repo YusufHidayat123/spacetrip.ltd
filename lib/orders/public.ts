@@ -2,16 +2,6 @@ import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-function makeOrderNumber() {
-  // e.g. ST-20260522-483921
-  const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const rand = Math.floor(100000 + Math.random() * 900000);
-  return `ST-${yyyy}${mm}${dd}-${rand}`;
-}
-
 export async function createOrderMvp(input: {
   customer_name: string;
   customer_email?: string | null;
@@ -26,75 +16,62 @@ export async function createOrderMvp(input: {
 }) {
   const supabase = createSupabaseAdminClient();
 
-  // Fetch item info (price/product name) from DB
-  const variantIds = input.items.map((i) => i.variant_id);
-
-  const { data: variants, error: variantsError } = await supabase
-    .from("product_variants")
-    .select("id,size_label,product_id,products(id,name,price)")
-    .in("id", variantIds);
-
-  if (variantsError) throw variantsError;
-
-  const variantMap = new Map<string, any>();
-  for (const v of variants ?? []) variantMap.set(v.id, v);
-
-  let total = 0;
-  const enriched = input.items.map((i) => {
-    const v = variantMap.get(i.variant_id);
-    if (!v) throw new Error("Invalid variant_id");
-
-    const price = Number(v.products.price);
-    total += price * i.quantity;
-
-    return {
-      variant_id: i.variant_id,
-      product_id: v.product_id,
-      product_name: v.products.name,
-      variant_label: v.size_label,
-      quantity: i.quantity,
-      price_at_purchase: price,
-    };
+  // Atomic stock decrement + order creation is handled in SQL (RPC).
+  // IMPORTANT: apply `supabase/orders.sql` to your Supabase DB to create the function.
+  const { data, error } = await supabase.rpc("create_order_with_stock", {
+    _customer_name: input.customer_name,
+    _customer_email: input.customer_email ?? null,
+    _customer_phone: input.customer_phone ?? null,
+    _shipping_address: input.shipping_address,
+    _items: input.items,
   });
 
-  const orderNumber = makeOrderNumber();
+  if (error) throw error;
 
-  const { data: order, error: orderError } = await supabase
+  const row = (data as unknown as { order_id: string; order_number: string }[] | null)?.[0];
+  if (!row?.order_id || !row.order_number) {
+    throw new Error("Failed to create order");
+  }
+
+  return { orderId: row.order_id, orderNumber: row.order_number };
+}
+
+function normalizePhone(s: string) {
+  // Keep digits only for a rough match.
+  return s.replace(/\D/g, "");
+}
+
+export async function findOrderForTracking(input: {
+  order_number: string;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+}) {
+  const supabase = createSupabaseAdminClient();
+
+  const { data: order, error } = await supabase
     .from("orders")
-    .insert({
-      order_number: orderNumber,
-      status: "new",
-      payment_status: "unpaid",
-      total_amount: total,
-      currency: "IDR",
-      customer_name: input.customer_name,
-      customer_email: input.customer_email ?? null,
-      customer_phone: input.customer_phone ?? null,
-      shipping_address: input.shipping_address,
-      pay_by: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    })
-    .select("*")
+    .select("id, customer_email, customer_phone")
+    .eq("order_number", input.order_number)
     .single();
 
-  if (orderError) throw orderError;
+  if (error) throw new Error("Order not found");
 
-  const orderId = order.id;
+  const email = (input.customer_email ?? "").trim().toLowerCase();
+  const phone = normalizePhone((input.customer_phone ?? "").trim());
 
-  const { error: itemsError } = await supabase.from("order_items").insert(
-    enriched.map((it) => ({
-      order_id: orderId,
-      product_id: it.product_id,
-      variant_id: it.variant_id,
-      product_name: it.product_name,
-      variant_label: it.variant_label,
-      quantity: it.quantity,
-      price_at_purchase: it.price_at_purchase,
-    }))
-  );
+  const storedEmail = String((order as { customer_email: string | null }).customer_email ?? "")
+    .trim()
+    .toLowerCase();
+  const storedPhone = normalizePhone(String((order as { customer_phone: string | null }).customer_phone ?? ""));
 
-  if (itemsError) throw itemsError;
+  const emailMatches = email.length > 0 && storedEmail.length > 0 && email === storedEmail;
+  const phoneMatches = phone.length > 0 && storedPhone.length > 0 && phone === storedPhone;
 
-  return { orderId, orderNumber };
+  if (!emailMatches && !phoneMatches) {
+    throw new Error("Order not found");
+  }
+
+  return (order as { id: string }).id;
 }
 
 export async function uploadPaymentProofMvp({

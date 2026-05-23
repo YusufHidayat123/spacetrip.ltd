@@ -43,20 +43,20 @@ export default async function CategoriesPage() {
         }
       />
 
-      <section className="mt-6 overflow-hidden rounded-xl border border-[color:var(--st-border)] bg-white shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+      <section className="mt-6 overflow-hidden rounded-xl border border-(--st-border) bg-white shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead className="w-[120px]">Active</TableHead>
-              <TableHead className="w-[120px]">Action</TableHead>
+              <TableHead className="w-30">Active</TableHead>
+              <TableHead className="w-30">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {categories.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-sm text-[color:var(--st-text-muted)]">
+                <TableCell colSpan={4} className="text-sm text-(--st-text-muted)">
                   No categories yet.
                 </TableCell>
               </TableRow>
@@ -64,16 +64,16 @@ export default async function CategoriesPage() {
               categories.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell className="text-[color:var(--st-text-muted)]">
+                  <TableCell className="text-(--st-text-muted)">
                     {c.slug}
                   </TableCell>
-                  <TableCell className="text-[color:var(--st-text-muted)]">
+                  <TableCell className="text-(--st-text-muted)">
                     {c.is_active ? "Yes" : "No"}
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/seller/categories/${c.id}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--st-text)] underline-offset-4 hover:underline"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                     >
                       Manage
                       <ArrowRight className="h-4 w-4" />

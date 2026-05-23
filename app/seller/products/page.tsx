@@ -2,12 +2,14 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Plus, Search } from "lucide-react";
 
 import { Breadcrumb } from "@/components/seller/breadcrumb";
 import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -29,8 +31,32 @@ function formatIDR(value: string) {
     : value;
 }
 
-export default async function ProductsPage() {
-  const products = await adminListProducts();
+type ProductListRow = {
+  id: string;
+  name: string;
+  slug: string;
+  price: string;
+  status: string;
+  categories: { name: string } | null;
+};
+
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const q = typeof sp.q === "string" ? sp.q : "";
+  const status = (typeof sp.status === "string" ? sp.status : "all") as
+    | "draft"
+    | "active"
+    | "all";
+  const page = typeof sp.page === "string" ? Number(sp.page) : 1;
+  const pageSize = typeof sp.pageSize === "string" ? Number(sp.pageSize) : 20;
+
+  const result = await adminListProducts({ q, status, page, pageSize });
+  const products = result.data as unknown as ProductListRow[];
+  const total = result.count;
 
   return (
     <PageShell>
@@ -51,7 +77,37 @@ export default async function ProductsPage() {
         }
       />
 
-      <section className="mt-6 overflow-hidden rounded-xl border border-[color:var(--st-border)] bg-white shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+      <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-4 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+        <form className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:max-w-[420px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--st-text-muted)" />
+            <Input
+              name="q"
+              defaultValue={q}
+              placeholder="Search products"
+              className="h-10 pl-9"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              name="status"
+              defaultValue={status}
+              className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+            </select>
+
+            <Button type="submit" className="h-10">
+              Apply
+            </Button>
+          </div>
+        </form>
+      </section>
+
+      <section className="mt-4 overflow-hidden rounded-xl border border-(--st-border) bg-white shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
         <Table>
           <TableHeader>
             <TableRow>
@@ -65,32 +121,32 @@ export default async function ProductsPage() {
           <TableBody>
             {products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-sm text-[color:var(--st-text-muted)]">
+                <TableCell colSpan={5} className="text-sm text-(--st-text-muted)">
                   No products yet.
                 </TableCell>
               </TableRow>
             ) : (
-              products.map((p: any) => (
+              products.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
                     <div className="font-medium">{p.name}</div>
-                    <div className="mt-0.5 text-xs text-[color:var(--st-text-muted)]">
+                    <div className="mt-0.5 text-xs text-(--st-text-muted)">
                       {p.slug}
                     </div>
                   </TableCell>
-                  <TableCell className="text-[color:var(--st-text-muted)]">
+                  <TableCell className="text-(--st-text-muted)">
                     {p.categories?.name ?? "—"}
                   </TableCell>
-                  <TableCell className="text-[color:var(--st-text)]">
+                  <TableCell className="text-(--st-text)">
                     {formatIDR(p.price)}
                   </TableCell>
-                  <TableCell className="text-[color:var(--st-text-muted)]">
+                  <TableCell className="text-(--st-text-muted)">
                     {p.status}
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/seller/products/${p.id}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[color:var(--st-text)] underline-offset-4 hover:underline"
+                      className="inline-flex items-center gap-1 text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                     >
                       Manage
                       <ArrowRight className="h-4 w-4" />
@@ -102,6 +158,21 @@ export default async function ProductsPage() {
           </TableBody>
         </Table>
       </section>
+
+      <Pagination
+        className="mt-4"
+        page={result.page}
+        pageSize={result.pageSize}
+        total={total}
+        href={(p) => {
+          const params = new URLSearchParams();
+          if (q) params.set("q", q);
+          if (status && status !== "all") params.set("status", status);
+          params.set("page", String(p));
+          params.set("pageSize", String(result.pageSize));
+          return `/seller/products?${params.toString()}`;
+        }}
+      />
     </PageShell>
   );
 }

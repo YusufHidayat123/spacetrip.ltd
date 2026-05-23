@@ -67,40 +67,40 @@ export default async function OrderDetailMvpPage({
       />
 
       <div className="mt-6 grid gap-6">
-        <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+              <div className="text-xs font-medium text-(--st-text-muted)">
                 Order number
               </div>
-              <div className="mt-1 text-lg font-semibold text-[color:var(--st-text)]">
+              <div className="mt-1 text-lg font-semibold text-(--st-text)">
                 {order.order_number}
               </div>
-              <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+              <div className="mt-1 text-sm text-(--st-text-muted)">
                 Created: {formatDateTime(order.created_at)}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs font-medium text-[color:var(--st-text-muted)]">
+              <div className="text-xs font-medium text-(--st-text-muted)">
                 Total
               </div>
-              <div className="mt-1 text-lg font-semibold text-[color:var(--st-text)]">
+              <div className="mt-1 text-lg font-semibold text-(--st-text)">
                 {formatIDR(order.total_amount)}
               </div>
-              <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+              <div className="mt-1 text-sm text-(--st-text-muted)">
                 Payment status: {order.payment_status}
               </div>
             </div>
           </div>
 
           <div className="mt-6">
-            <div className="text-sm font-semibold text-[color:var(--st-text)]">
+            <div className="text-sm font-semibold text-(--st-text)">
               Items
             </div>
-            <div className="mt-3 overflow-hidden rounded-lg border border-[color:var(--st-border)]">
+            <div className="mt-3 overflow-hidden rounded-lg border border-(--st-border)">
               <table className="w-full text-sm">
-                <thead className="border-b border-[color:var(--st-border)]">
-                  <tr className="text-xs font-medium text-[color:var(--st-text-muted)]">
+                <thead className="border-b border-(--st-border)">
+                  <tr className="text-xs font-medium text-(--st-text-muted)">
                     <th className="px-4 py-3 text-left">Product</th>
                     <th className="px-4 py-3 text-left">Variant</th>
                     <th className="px-4 py-3 text-right">Qty</th>
@@ -108,13 +108,19 @@ export default async function OrderDetailMvpPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {(items ?? []).map((it: any) => (
+                  {(items ?? []).map((it: {
+                    id: string;
+                    product_name: string;
+                    variant_label: string;
+                    quantity: number;
+                    price_at_purchase: string;
+                  }) => (
                     <tr
                       key={it.id}
-                      className="border-b border-[color:var(--st-border)] last:border-0"
+                      className="border-b border-(--st-border) last:border-0"
                     >
                       <td className="px-4 py-3 font-medium">{it.product_name}</td>
-                      <td className="px-4 py-3 text-[color:var(--st-text-muted)]">
+                      <td className="px-4 py-3 text-(--st-text-muted)">
                         {it.variant_label}
                       </td>
                       <td className="px-4 py-3 text-right">{it.quantity}</td>
@@ -129,17 +135,17 @@ export default async function OrderDetailMvpPage({
           </div>
         </section>
 
-        <section className="rounded-xl border border-[color:var(--st-border)] bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-          <div className="text-sm font-semibold text-[color:var(--st-text)]">
+        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+          <div className="text-sm font-semibold text-(--st-text)">
             Payment (Manual QRIS)
           </div>
-          <div className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+          <div className="mt-1 text-sm text-(--st-text-muted)">
             Pay using the store QRIS, then upload your payment proof screenshot.
           </div>
 
-          <div className="mt-4 rounded-lg border border-[color:var(--st-border)] bg-[#F7F8FA] p-4 text-sm text-[color:var(--st-text)]">
+          <div className="mt-4 rounded-lg border border-(--st-border) bg-[#F7F8FA] p-4 text-sm text-(--st-text)">
             <div className="font-medium">Instructions</div>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[color:var(--st-text-muted)]">
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-(--st-text-muted)">
               <li>Open your e-wallet/banking app.</li>
               <li>Scan the store QRIS.</li>
               <li>Pay exactly: {formatIDR(order.total_amount)}.</li>
@@ -153,7 +159,7 @@ export default async function OrderDetailMvpPage({
         </section>
       </div>
 
-      <p className="mt-4 text-xs text-[color:var(--st-text-muted)]">
+      <p className="mt-4 text-xs text-(--st-text-muted)">
         MVP test page only.
       </p>
     </PageShell>

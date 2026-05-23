@@ -13,11 +13,11 @@ export default function OrderDetailError({
 }) {
   return (
     <div className="mx-auto w-full max-w-[720px] px-6 py-10">
-      <div className="rounded-xl border border-[color:var(--st-border)] bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-        <div className="text-sm font-semibold text-[color:var(--st-text)]">
+      <div className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+        <div className="text-sm font-semibold text-(--st-text)">
           Something went wrong
         </div>
-        <p className="mt-2 text-sm text-[color:var(--st-text-muted)]">
+        <p className="mt-2 text-sm text-(--st-text-muted)">
           {error.message.includes("Body exceeded")
             ? "Upload is too large. Please select a smaller image and try again."
             : error.message}
