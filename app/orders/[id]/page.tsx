@@ -1,17 +1,20 @@
 export const dynamic = "force-dynamic";
 
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { isCustomerLoggedIn } from "@/lib/supabase/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { MobileShell } from "@/components/storefront/mobile-shell";
 import { StoreHeader } from "@/components/storefront/store-header";
 import { Badge } from "@/components/ui/badge";
 import { PaymentProofForm } from "./_components/payment-proof-form";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { uploadPaymentProofMvp } from "@/lib/orders/public";
 import { getStoreSettingsForCheckout } from "@/lib/settings/public";
 import { formatDateTime, formatIDR } from "@/lib/orders/format";
+
+function isSupabaseNoRowsError(e: unknown): e is { code: string } {
+  return typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "PGRST116";
+}
 
 function PaymentBadge({ status }: { status: string }) {
   if (status === "verified") return <Badge variant="green">Terverifikasi</Badge>;
@@ -36,21 +39,36 @@ export default async function OrderDetailMvpPage({
 }) {
   const { id } = await params;
 
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   // Orders are login-only.
-  if (!(await isCustomerLoggedIn())) {
-    redirect(`/profile?next=/orders/${id}`);
+  if (!user) {
+    redirect(`/login?next=${encodeURIComponent(`/orders/${id}`)}`);
   }
 
-  const supabase = createSupabaseAdminClient();
   const [settings, orderRes, itemsRes, proofsRes] = await Promise.all([
     getStoreSettingsForCheckout(),
-    supabase.from("orders").select("*").eq("id", id).single(),
-    supabase.from("order_items").select("*").eq("order_id", id).order("created_at", { ascending: true }),
-    supabase.from("order_payment_proofs").select("id,original_name,created_at").eq("order_id", id).order("created_at", { ascending: false }),
+    supabase.from("orders").select("*").eq("id", id).eq("user_id", user.id).single(),
+    supabase
+      .from("order_items")
+      .select("*")
+      .eq("order_id", id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("order_payment_proofs")
+      .select("id,original_name,created_at")
+      .eq("order_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
   const { data: order, error: orderError } = orderRes;
-  if (orderError) throw orderError;
+  if (orderError) {
+    if (isSupabaseNoRowsError(orderError)) notFound();
+    throw orderError;
+  }
 
   const { data: items, error: itemsError } = itemsRes;
   if (itemsError) throw itemsError;
@@ -61,16 +79,64 @@ export default async function OrderDetailMvpPage({
   async function uploadProofAction(formData: FormData) {
     "use server";
 
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      redirect(`/login?next=${encodeURIComponent(`/orders/${id}`)}`);
+    }
+
+    // Ensure order belongs to user (avoid orphan uploads).
+    const { error: ownErr } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+    if (ownErr) throw new Error("Order tidak ditemukan");
+
     const file = formData.get("proof") as File | null;
     if (!file || file.size === 0) throw new Error("Pilih gambar bukti bayar dulu.");
 
-    // Basic server-side guard (still MVP)
+    // Basic server-side guard
     const maxBytes = 18 * 1024 * 1024;
     if (file.size > maxBytes) {
       throw new Error("File terlalu besar. Upload gambar yang lebih kecil.");
     }
 
-    await uploadPaymentProofMvp({ orderId: id, file });
+    // Upload to Storage using service role (bucket is recommended private).
+    const admin = createSupabaseAdminClient();
+    const bucket = process.env.SUPABASE_PAYMENT_PROOFS_BUCKET || "payment-proofs";
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const safeExt = ["jpg", "jpeg", "png", "webp"].includes(ext) ? ext : "jpg";
+    const fileName = `${crypto.randomUUID()}.${safeExt}`;
+    const storagePath = `${id}/${fileName}`;
+
+    const arrayBuffer = await file.arrayBuffer();
+
+    const { error: uploadError } = await admin.storage
+      .from(bucket)
+      .upload(storagePath, arrayBuffer, {
+        contentType: file.type || `image/${safeExt}`,
+        upsert: false,
+        cacheControl: "3600",
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Insert proof + mark payment submitted using auth-aware RPC.
+    const { error: rpcError } = await supabase.rpc("submit_payment_proof_auth", {
+      _order_id: id,
+      _storage_path: storagePath,
+      _original_name: file.name,
+      _mime_type: file.type,
+      _size_bytes: file.size,
+    });
+
+    if (rpcError) throw rpcError;
+
     redirect(`/orders/${id}`);
   }
 

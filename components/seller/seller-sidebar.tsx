@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import * as React from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type NavItem = {
   label: string;
@@ -66,6 +67,25 @@ export function SellerSidebar({
   counts: SidebarCounts;
 }) {
   const pathname = usePathname();
+  const [email, setEmail] = React.useState<string>("admin");
+
+  React.useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const e = data.user?.email;
+      if (e) setEmail(e);
+    })();
+  }, []);
+
+  async function logout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    window.location.href = "/seller/login";
+  }
+
+  const initial = (email?.[0] ?? "A").toUpperCase();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 w-[272px] border-r border-[color:var(--st-border)] bg-white">
@@ -159,14 +179,14 @@ export function SellerSidebar({
           <Separator />
           <div className="mt-4 flex items-center gap-3 rounded-md border border-[color:var(--st-border)] bg-white px-3 py-2 shadow-[0_1px_0_rgba(17,24,39,0.03)]">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--st-accent-border)] bg-[color:var(--st-accent-soft)] text-sm font-semibold text-[color:var(--st-text)]">
-              A
+              {initial}
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-[color:var(--st-text)]">
                 Admin
               </div>
               <div className="truncate text-xs text-[color:var(--st-text-muted)]">
-                admin@spacetrip.id
+                {email}
               </div>
             </div>
             <button
@@ -178,6 +198,7 @@ export function SellerSidebar({
             </button>
             <button
               type="button"
+              onClick={logout}
               className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[color:var(--st-text-muted)] transition-colors hover:bg-[#F7F8FA] hover:text-[color:var(--st-text)]"
               aria-label="Logout"
             >

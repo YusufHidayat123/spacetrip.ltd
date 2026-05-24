@@ -32,7 +32,16 @@ Open **SQL Editor** in Supabase and run:
 3. `supabase/orders.sql`
 4. `supabase/orders_rls.sql`
 
-## 4) Run the app
+> Important: `schema.sql` includes a trigger on `auth.users` to auto-create a `profiles` row for every new user.
+
+## 4) Configure Auth redirect URLs (Google OAuth)
+In Supabase Dashboard → Authentication → URL Configuration:
+- Site URL: `http://localhost:3000` (or your deployed URL)
+- Redirect URLs: add `http://localhost:3000/auth/callback`
+
+Then enable Google provider in Authentication → Providers.
+
+## 5) Run the app
 ```sh
 npm run dev
 ```
@@ -42,7 +51,10 @@ Admin pages:
 - `/seller/products`
 - `/seller/products/new`
 
-## Notes (MVP security)
-Currently, admin writes (create/update) are done server-side using the **service role key**.
+## Notes (Security)
+- Customer pages use **Supabase Auth** (Google) + server-side session cookies.
+- Seller pages (`/seller/*`) are protected by middleware and require `profiles.role` = `seller`/`admin`.
+  - To grant access, update the user's `profiles.role` in the DB (service role / SQL Editor).
+
+Admin writes (create/update) are done server-side using the **service role key**.
 - Do **not** expose `SUPABASE_SERVICE_ROLE_KEY` to the browser.
-- Before production, replace this with Supabase Auth + role-based RLS policies.

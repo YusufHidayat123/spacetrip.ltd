@@ -20,6 +20,7 @@ export function ProductCheckoutSheet({
   slug,
   productName,
   loggedIn,
+  profileComplete,
   variants,
   defaultVariantId,
   action,
@@ -27,6 +28,7 @@ export function ProductCheckoutSheet({
   slug: string;
   productName: string;
   loggedIn: boolean;
+  profileComplete: boolean;
   variants: Variant[];
   defaultVariantId: string;
   action: (formData: FormData) => void | Promise<void>;
@@ -36,6 +38,7 @@ export function ProductCheckoutSheet({
   const hasAnyStock = variants.some((v) => v.stock > 0);
 
   const loginHref = `/profile?next=/products/${encodeURIComponent(slug)}&intent=checkout`;
+  const setupHref = `/profile/setup?next=/products/${encodeURIComponent(slug)}&intent=checkout`;
 
   const sizeHelp = !hasAnyStock
     ? "Stok sedang habis. Kamu tetap bisa lihat produk lain dulu."
@@ -49,14 +52,20 @@ export function ProductCheckoutSheet({
         </Button>
 
         {loggedIn ? (
-          <Button
-            type="button"
-            className="h-11 rounded-full"
-            onClick={() => setOpen(true)}
-            disabled={!hasAnyStock}
-          >
-            Pesan
-          </Button>
+          profileComplete ? (
+            <Button
+              type="button"
+              className="h-11 rounded-full"
+              onClick={() => setOpen(true)}
+              disabled={!hasAnyStock}
+            >
+              Pesan
+            </Button>
+          ) : (
+            <Button asChild className="h-11 rounded-full">
+              <Link href={setupHref}>Lengkapi profil</Link>
+            </Button>
+          )
         ) : (
           <Button asChild className="h-11 rounded-full">
             <Link href={loginHref}>Masuk untuk pesan</Link>
@@ -106,26 +115,8 @@ export function ProductCheckoutSheet({
             <Input name="quantity" type="number" min={1} defaultValue={1} />
           </div>
 
-          <div className="rounded-2xl border border-(--st-border) bg-[#F7F8FA] p-4">
-            <div className="text-xs font-semibold text-(--st-text)">Data & alamat pengiriman</div>
-            <div className="mt-1 text-xs text-(--st-text-muted)">
-              (MVP) Nanti akan otomatis dari profil.
-            </div>
-
-            <div className="mt-4 grid gap-3">
-              <Input name="customer_name" placeholder="Nama lengkap" required />
-              <Input name="customer_email" type="email" placeholder="Email (opsional)" />
-              <Input name="customer_phone" placeholder="No. HP (opsional)" />
-
-              <div className="h-px bg-(--st-border)" />
-
-              <Input name="line1" placeholder="Alamat lengkap" required />
-              <div className="grid grid-cols-2 gap-2">
-                <Input name="city" placeholder="Kota" required />
-                <Input name="province" placeholder="Provinsi" required />
-              </div>
-              <Input name="postal_code" placeholder="Kode pos" required />
-            </div>
+          <div className="rounded-2xl border border-(--st-border) bg-[#F7F8FA] p-4 text-xs text-(--st-text-muted)">
+            Alamat pengiriman akan otomatis diambil dari profil kamu.
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-1">

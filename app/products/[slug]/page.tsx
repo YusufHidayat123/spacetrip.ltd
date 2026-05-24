@@ -2,14 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { notFound, redirect } from "next/navigation";
 
-import { isCustomerLoggedIn } from "@/lib/supabase/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { MobileShell } from "@/components/storefront/mobile-shell";
 import { StoreHeader } from "@/components/storefront/store-header";
 import { ProductImageCarousel } from "@/components/storefront/product-image-carousel";
 import { ProductCheckoutSheet } from "@/components/storefront/product-checkout-sheet";
 import { formatIDR } from "@/lib/orders/format";
-import { createOrderMvp } from "@/lib/orders/public";
+
 import {
   getPublicProductImageUrl,
   publicGetActiveProductBySlug,
@@ -17,6 +17,20 @@ import {
 
 function isSupabaseNoRowsError(e: unknown): e is { code: string } {
   return typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "PGRST116";
+}
+
+type ShippingAddress = {
+  line1: string;
+  city: string;
+  province: string;
+  postal_code: string;
+};
+
+function hasCompleteShippingAddress(a: unknown): a is ShippingAddress {
+  if (typeof a !== "object" || a === null) return false;
+  const o = a as Record<string, unknown>;
+  const keys = ["line1", "city", "province", "postal_code"] as const;
+  return keys.every((k) => typeof o[k] === "string" && String(o[k]).trim().length > 0);
 }
 
 export default async function ProductDetailPage({
@@ -45,46 +59,75 @@ export default async function ProductDetailPage({
   const variants = (product.variants ?? []).slice();
   const defaultVariantId = variants.find((v) => v.stock > 0)?.id ?? variants[0]?.id ?? "";
 
-  const loggedIn = await isCustomerLoggedIn();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const loggedIn = Boolean(user);
+
+  let profileComplete = false;
+  if (user) {
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("full_name,shipping_address")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+
+    const fullNameOk = Boolean(profile?.full_name && String(profile.full_name).trim().length > 0);
+    const addressOk = hasCompleteShippingAddress(profile?.shipping_address);
+    profileComplete = fullNameOk && addressOk;
+  }
 
   async function checkoutAction(formData: FormData) {
     "use server";
 
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     // Do not allow ordering before login.
-    if (!(await isCustomerLoggedIn())) {
-      redirect(`/profile?next=/products/${slug}&intent=checkout`);
+    if (!user) {
+      redirect(`/login?next=${encodeURIComponent(`/products/${slug}`)}`);
+    }
+
+    // Enforce profile completion before checkout (name + shipping address).
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("full_name,shipping_address")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profileError) throw profileError;
+
+    const fullNameOk = Boolean(profile?.full_name && String(profile.full_name).trim().length > 0);
+    const addressOk = hasCompleteShippingAddress(profile?.shipping_address);
+
+    if (!fullNameOk || !addressOk) {
+      redirect(`/profile/setup?next=${encodeURIComponent(`/products/${slug}`)}`);
     }
 
     const variant_id = String(formData.get("variant_id") ?? "");
     const quantity = Number(String(formData.get("quantity") ?? "1"));
 
-    const customer_name = String(formData.get("customer_name") ?? "");
-    const customer_email = String(formData.get("customer_email") ?? "");
-    const customer_phone = String(formData.get("customer_phone") ?? "");
-
-    const line1 = String(formData.get("line1") ?? "");
-    const city = String(formData.get("city") ?? "");
-    const province = String(formData.get("province") ?? "");
-    const postal_code = String(formData.get("postal_code") ?? "");
-
-    if (!variant_id) throw new Error("Please select a size.");
+    if (!variant_id) throw new Error("Pilih ukuran dulu.");
     if (!Number.isFinite(quantity) || quantity < 1) {
-      throw new Error("Quantity must be at least 1.");
-    }
-    if (!customer_name) throw new Error("Customer name is required");
-    if (!line1 || !city || !province || !postal_code) {
-      throw new Error("Complete shipping address");
+      throw new Error("Jumlah minimal 1.");
     }
 
-    const { orderId } = await createOrderMvp({
-      customer_name,
-      customer_email: customer_email || null,
-      customer_phone: customer_phone || null,
-      shipping_address: { line1, city, province, postal_code },
-      items: [{ variant_id, quantity }],
+    const { data, error } = await supabase.rpc("create_order_with_stock_auth", {
+      _shipping_address: null,
+      _items: [{ variant_id, quantity }],
     });
 
-    redirect(`/orders/${orderId}`);
+    if (error) throw error;
+
+    const row = (data as unknown as { order_id: string; order_number: string }[] | null)?.[0];
+    if (!row?.order_id) throw new Error("Gagal membuat order");
+
+    redirect(`/orders/${row.order_id}`);
   }
 
   return (
@@ -139,6 +182,7 @@ export default async function ProductDetailPage({
             slug={slug}
             productName={product.name}
             loggedIn={loggedIn}
+            profileComplete={profileComplete}
             variants={variants}
             defaultVariantId={defaultVariantId}
             action={checkoutAction}
