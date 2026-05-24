@@ -47,7 +47,7 @@ export function PaymentProofForm({
     const mb = file.size / (1024 * 1024);
     if (mb > MAX_MB) {
       setError(
-        `File is ~${mb.toFixed(1)} MB. Please select a smaller image (max ~${MAX_MB} MB).`
+        `File ~${mb.toFixed(1)} MB. Pilih gambar yang lebih kecil (maks ~${MAX_MB} MB).`
       );
     } else {
       setError(null);
@@ -60,36 +60,43 @@ export function PaymentProofForm({
     });
   }
 
+  let helper: React.ReactNode = (
+    <div className="text-xs text-(--st-text-muted)">
+      Upload screenshot dari aplikasi e-wallet / mobile banking kamu.
+    </div>
+  );
+
+  if (error) {
+    helper = <div className="text-xs text-[#B91C1C]">{error}</div>;
+  } else if (preview) {
+    helper = (
+      <div className="text-xs text-(--st-text-muted)">
+        Terpilih: <span className="font-medium text-(--st-text)">{preview.name}</span>{" "}
+        ({formatBytes(preview.size)})
+      </div>
+    );
+  }
+
   return (
-    <form action={action} className="grid gap-3">
+    <form action={action} encType="multipart/form-data" className="grid gap-3">
       <label className="text-sm font-medium text-(--st-text)">
-        Upload payment proof
+        Upload bukti bayar
       </label>
 
-      <div className="grid gap-3 md:grid-cols-[1fr_220px]">
+      <div className="grid gap-3">
         <div className="grid gap-2">
           <Input name="proof" type="file" accept="image/*" required onChange={onChange} />
-          {error ? (
-            <div className="text-xs text-[#B91C1C]">{error}</div>
-          ) : preview ? (
-            <div className="text-xs text-(--st-text-muted)">
-              Selected: <span className="font-medium text-(--st-text)">{preview.name}</span> ({formatBytes(preview.size)})
-            </div>
-          ) : (
-            <div className="text-xs text-(--st-text-muted)">
-              Please upload a screenshot from your banking/e-wallet app.
-            </div>
-          )}
+          {helper}
         </div>
 
-        <SubmitButton
-          pendingText="Uploading..."
-          disabled={Boolean(error)}
-          className="h-10"
-        >
-          <Upload className="h-4 w-4" />
-          Submit proof
-        </SubmitButton>
+          <SubmitButton
+            pendingText="Mengunggah..."
+            disabled={Boolean(error)}
+            className="h-11 w-full rounded-full"
+          >
+            <Upload className="h-4 w-4" />
+            Kirim bukti
+          </SubmitButton>
       </div>
 
       {preview ? (
@@ -108,7 +115,7 @@ export function PaymentProofForm({
       ) : null}
 
       <p className="text-xs text-(--st-text-muted)">
-        Verification is manual. Your order will be processed after payment is verified.
+        Verifikasi dilakukan manual. Order kamu akan diproses setelah pembayaran diverifikasi.
       </p>
     </form>
   );

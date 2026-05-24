@@ -1,0 +1,3 @@
+-- Seed data for local development.
+--
+-- Intentionally minimal. Add categories/products here if you want sample data.

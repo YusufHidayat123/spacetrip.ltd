@@ -72,6 +72,29 @@ create table if not exists public.product_images (
 
 create index if not exists product_images_product_id_idx on public.product_images (product_id);
 
+-- profiles (auth-owned customer/seller data)
+--
+-- 1:1 with auth.users
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'customer' check (role in ('customer', 'seller', 'admin')),
+  full_name text,
+  phone text,
+  shipping_address jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- store settings (QRIS + instructions)
+create table if not exists public.store_settings (
+  id uuid primary key default gen_random_uuid(),
+  store_name text not null default 'Spacetrip',
+  payment_instructions text,
+  qris_image_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 -- updated_at triggers
 create or replace function public.set_updated_at()
 returns trigger as $$
@@ -80,6 +103,22 @@ begin
   return new;
 end;
 $$ language plpgsql;
+
+-- Auto-create a profile when a new auth user is created.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id)
+  values (new.id)
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
 
 do $$
 begin
@@ -105,6 +144,30 @@ begin
     create trigger set_product_variants_updated_at
     before update on public.product_variants
     for each row execute function public.set_updated_at();
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger where tgname = 'set_profiles_updated_at'
+  ) then
+    create trigger set_profiles_updated_at
+    before update on public.profiles
+    for each row execute function public.set_updated_at();
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger where tgname = 'set_store_settings_updated_at'
+  ) then
+    create trigger set_store_settings_updated_at
+    before update on public.store_settings
+    for each row execute function public.set_updated_at();
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger where tgname = 'on_auth_user_created'
+  ) then
+    create trigger on_auth_user_created
+    after insert on auth.users
+    for each row execute function public.handle_new_user();
   end if;
 end $$;
 

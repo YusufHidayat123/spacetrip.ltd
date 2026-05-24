@@ -40,6 +40,7 @@ export async function publicListActiveCategories() {
 export async function publicListActiveProducts(params?: {
   q?: string;
   categorySlug?: string;
+  limit?: number;
 }) {
   const supabase = createSupabasePublicClient();
 
@@ -69,6 +70,10 @@ export async function publicListActiveProducts(params?: {
 
   if (params?.q && params.q.trim().length > 0) {
     query = query.ilike("name", `%${params.q.trim()}%`);
+  }
+
+  if (typeof params?.limit === "number" && Number.isFinite(params.limit)) {
+    query = query.limit(Math.max(1, Math.min(params.limit, 60)));
   }
 
   const { data, error } = await query;

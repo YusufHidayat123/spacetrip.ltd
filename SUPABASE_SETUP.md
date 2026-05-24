@@ -15,10 +15,12 @@ Create a local `.env.local` based on `.env.example`.
 Create buckets:
 - `product-images` (or set `SUPABASE_PRODUCT_IMAGES_BUCKET`)
 - `payment-proofs` (or set `SUPABASE_PAYMENT_PROOFS_BUCKET`)
+- `store-assets` (or set `SUPABASE_STORE_ASSETS_BUCKET`) — for QRIS image, logos, etc.
 
 Recommended for MVP:
 - `product-images`: **public** (for catalog)
 - `payment-proofs`: **private** (payment proof is sensitive). The admin UI uses signed URLs.
+- `store-assets`: **public** (QRIS needs to be viewable by customers).
 
 Path convention used by the app:
 - `{productId}/{uuid}.{ext}`

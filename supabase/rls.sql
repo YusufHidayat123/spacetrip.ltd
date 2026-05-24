@@ -14,6 +14,9 @@ alter table public.products enable row level security;
 alter table public.product_variants enable row level security;
 alter table public.product_images enable row level security;
 
+alter table public.profiles enable row level security;
+alter table public.store_settings enable row level security;
+
 -- Public read policies
 drop policy if exists "public_read_active_categories" on public.categories;
 create policy "public_read_active_categories"
@@ -42,6 +45,25 @@ on public.product_images
 for select
 to anon, authenticated
 using (true);
+
+-- profiles: authenticated users can read/update their own row
+
+drop policy if exists "profiles_read_own" on public.profiles;
+create policy "profiles_read_own"
+on public.profiles
+for select
+to authenticated
+using (id = auth.uid());
+
+drop policy if exists "profiles_update_own" on public.profiles;
+create policy "profiles_update_own"
+on public.profiles
+for update
+to authenticated
+using (id = auth.uid())
+with check (id = auth.uid());
+
+-- store_settings: no anon/authenticated policies (admin only via service role)
 
 -- No public insert/update/delete policies (admin only via service role)
 

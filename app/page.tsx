@@ -1,85 +1,132 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 
-import { Rocket } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
+import { MobileShell } from "@/components/storefront/mobile-shell";
+import { StoreHeader } from "@/components/storefront/store-header";
+import { ProductCard } from "@/components/storefront/product-card";
 import { Button } from "@/components/ui/button";
+import { publicListActiveProducts } from "@/lib/catalog/public";
 
-export default function Home() {
+export default async function Home() {
+  const products = await publicListActiveProducts({ limit: 6 });
+
   return (
-    <div className="min-h-screen bg-(--st-bg)">
-      <div className="mx-auto w-full max-w-6xl px-6 py-10">
-        <header className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-(--st-accent) text-black shadow-[0_1px_0_rgba(17,24,39,0.04)]">
-              <Rocket className="h-4 w-4" />
-            </span>
-            <span className="text-sm font-semibold tracking-tight text-(--st-text)">
-              spacetrip
-            </span>
-          </Link>
+    <MobileShell>
+      <StoreHeader rightHref="/products" rightLabel="Koleksi" />
 
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline" className="h-9">
-              <Link href="/orders">Track order</Link>
-            </Button>
-            <Button asChild className="h-9">
-              <Link href="/products">Shop</Link>
-            </Button>
+      <main className="px-5 pb-6">
+        <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-[0_16px_40px_rgba(17,24,39,0.10)]">
+          <div className="relative aspect-[4/3] w-full bg-[#F7F8FA]">
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/0 via-black/0 to-black/5" />
+
+            <div className="absolute left-5 top-5 flex flex-wrap items-center gap-2">
+              <div className="rounded-full border border-(--st-border) bg-white/90 px-3 py-1 text-[11px] font-medium text-(--st-text-muted)">
+                Kurasi thrift
+              </div>
+              <div className="rounded-full border border-(--st-border) bg-white/90 px-3 py-1 text-[11px] font-medium text-(--st-text-muted)">
+                Stok terbatas
+              </div>
+            </div>
+
+            <div className="absolute bottom-5 left-5 right-5">
+              <div className="text-2xl font-semibold tracking-tight text-(--st-text)">
+                Temuan dari Orbit.
+              </div>
+              <div className="mt-1 text-sm text-(--st-text-muted)">
+                Kurasi thrift stok terbatas. Kalau cocok, jangan kelamaan.
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Button asChild className="h-10 rounded-full">
+                  <Link href="/products">
+                    Lihat koleksi
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="h-10 rounded-full bg-white">
+                  <Link href="/profile?next=/products&intent=checkout">Masuk untuk pesan</Link>
+                </Button>
+              </div>
+
+              <div className="mt-3 text-[11px] text-(--st-text-muted)">
+                Untuk memesan, kamu perlu masuk dan melengkapi data profil.
+              </div>
+            </div>
           </div>
-        </header>
+        </section>
 
-        <main className="mt-12 grid gap-10 lg:grid-cols-2 lg:items-center">
-          <section>
-            <div className="inline-flex items-center rounded-full border border-(--st-border) bg-white px-3 py-1 text-xs font-medium text-(--st-text-muted)">
-              Manual QRIS payment • Upload proof after checkout
+        <section className="mt-5 grid gap-3 rounded-[24px] border border-(--st-border) bg-white p-4">
+          <div className="text-sm font-semibold text-(--st-text)">Fokus Spacetrip</div>
+          <div className="grid gap-2 text-sm text-(--st-text-muted)">
+            <div className="flex gap-2">
+              <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-(--st-accent-soft) text-[11px] font-semibold text-(--st-text)">1</span>
+              <span>Kurasi item thrift yang wearable untuk dipakai harian.</span>
             </div>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-(--st-text)">
-              Spacetrip clothing drops
-            </h1>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-(--st-text-muted)">
-              Browse products, place your order, then pay via QRIS and upload your payment proof.
-              We’ll confirm your payment and process the shipment.
-            </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button asChild className="h-10">
-                <Link href="/products">Browse products</Link>
-              </Button>
-              <Button asChild variant="outline" className="h-10">
-                <Link href="/orders">Track existing order</Link>
-              </Button>
+            <div className="flex gap-2">
+              <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-(--st-accent-soft) text-[11px] font-semibold text-(--st-text)">2</span>
+              <span>Info ukuran & kondisi jelas (stok cepat berubah).</span>
             </div>
-
-            <div className="mt-8 grid gap-3 rounded-xl border border-(--st-border) bg-white p-5 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-              <div className="text-sm font-semibold text-(--st-text)">How it works</div>
-              <ol className="list-decimal space-y-1 pl-4 text-sm text-(--st-text-muted)">
-                <li>Select a product and size.</li>
-                <li>Fill shipping details and place the order.</li>
-                <li>Pay via QRIS.</li>
-                <li>Upload your payment proof from the order page.</li>
-              </ol>
+            <div className="flex gap-2">
+              <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-(--st-accent-soft) text-[11px] font-semibold text-(--st-text)">3</span>
+              <span>Kaos, jeans, cargo, topi, dan item thrift lainnya — update rutin.</span>
             </div>
+          </div>
+        </section>
 
-            <div className="mt-6 text-xs text-(--st-text-muted)">
-              Admin? <Link href="/seller" className="underline underline-offset-4">Open console</Link>
+        <section className="mt-6">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-(--st-text)">Produk terbaru</div>
+              <div className="mt-0.5 text-xs text-(--st-text-muted)">Update terbaru dari koleksi thrift</div>
             </div>
-          </section>
+            <Link href="/products" className="text-xs font-medium text-(--st-text) underline underline-offset-4">
+              Lihat semua
+            </Link>
+          </div>
 
-          <section className="rounded-2xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-            <div className="aspect-[4/3] w-full overflow-hidden rounded-xl border border-(--st-border) bg-[#F7F8FA]">
-              <div className="flex h-full w-full items-center justify-center text-sm text-(--st-text-muted)">
-                Hero image placeholder
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            {products.length === 0 ? (
+              <div className="col-span-2 rounded-2xl border border-(--st-border) bg-white p-4 text-sm text-(--st-text-muted)">
+                Belum ada produk.
               </div>
-            </div>
-            <div className="mt-4 grid gap-2">
-              <div className="text-sm font-semibold text-(--st-text)">Fast MVP storefront</div>
-              <div className="text-sm text-(--st-text-muted)">
-                This is the minimal customer-facing flow for the PRD MVP.
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
-    </div>
+            ) : (
+              products.map((p) => {
+                const imgs = (p.product_images ?? []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+                const hero = imgs[0] ?? null;
+                return (
+                  <ProductCard
+                    key={p.id}
+                    slug={p.slug}
+                    name={p.name}
+                    price={p.price}
+                    image={hero ? { storage_path: hero.storage_path, alt: hero.alt ?? null } : null}
+                  />
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-[24px] border border-(--st-border) bg-white p-4">
+          <div className="text-sm font-semibold text-(--st-text)">Cara belanja</div>
+          <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-(--st-text-muted)">
+            <li>Browse koleksi thrift terbaru.</li>
+            <li>Masuk untuk bisa pesan.</li>
+            <li>Pilih ukuran & jumlah, lalu lanjutkan pemesanan.</li>
+            <li>Pantau status pesanan dari menu Orders.</li>
+          </ol>
+        </section>
+
+        <div className="mt-6 text-center text-[11px] text-(--st-text-muted)">
+          Mau lihat status pesanan?{" "}
+          <Link href="/orders" className="underline underline-offset-4">
+            Buka Orders
+          </Link>
+        </div>
+      </main>
+    </MobileShell>
   );
 }
