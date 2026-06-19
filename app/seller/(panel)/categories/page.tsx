@@ -24,12 +24,12 @@ export default async function CategoriesPage() {
   return (
     <PageShell>
       <PageHeader
-        title="Category"
+        title="Kategori"
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "category" },
+              { label: "admin", href: "/seller" },
+              { label: "kategori" },
             ]}
           />
         }
@@ -37,7 +37,7 @@ export default async function CategoriesPage() {
           <Button asChild>
             <Link href="/seller/categories/new">
               <Plus className="h-4 w-4" />
-              New Category
+              Kategori Baru
             </Link>
           </Button>
         }
@@ -47,17 +47,17 @@ export default async function CategoriesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Nama</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead className="w-30">Active</TableHead>
-              <TableHead className="w-30">Action</TableHead>
+              <TableHead className="w-30">Aktif</TableHead>
+              <TableHead className="w-30">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {categories.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-sm text-(--st-text-muted)">
-                  No categories yet.
+                  Belum ada kategori.
                 </TableCell>
               </TableRow>
             ) : (
@@ -68,14 +68,14 @@ export default async function CategoriesPage() {
                     {c.slug}
                   </TableCell>
                   <TableCell className="text-(--st-text-muted)">
-                    {c.is_active ? "Yes" : "No"}
+                    {c.is_active ? "Ya" : "Tidak"}
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/seller/categories/${c.id}`}
                       className="inline-flex items-center gap-1 text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                     >
-                      Manage
+                      Kelola
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </TableCell>

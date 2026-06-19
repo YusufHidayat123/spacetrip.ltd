@@ -50,7 +50,7 @@ export default async function OrdersPage() {
       <StoreHeader title="Orders" backHref="/" />
 
       <main className="px-5 pb-6">
-        <section className="mt-4 rounded-[24px] border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
+        <section className="mt-4 rounded-3xl border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
           <div className="text-lg font-semibold tracking-tight text-(--st-text)">
             Pesanan saya
           </div>

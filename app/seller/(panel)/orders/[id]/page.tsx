@@ -15,19 +15,19 @@ import { formatDateTime, formatIDR } from "@/lib/orders/format";
 import type { OrderStatus, PaymentStatus } from "@/lib/orders/types";
 
 function PaymentBadge({ status }: { status: PaymentStatus }) {
-  if (status === "verified") return <Badge variant="green">verified</Badge>;
-  if (status === "submitted") return <Badge variant="amber">submitted</Badge>;
-  if (status === "rejected") return <Badge variant="red">rejected</Badge>;
-  if (status === "expired") return <Badge variant="red">expired</Badge>;
-  return <Badge variant="neutral">unpaid</Badge>;
+  if (status === "verified") return <Badge variant="green">terverifikasi</Badge>;
+  if (status === "submitted") return <Badge variant="amber">menunggu review</Badge>;
+  if (status === "rejected") return <Badge variant="red">ditolak</Badge>;
+  if (status === "expired") return <Badge variant="red">kedaluwarsa</Badge>;
+  return <Badge variant="neutral">belum bayar</Badge>;
 }
 
 function OrderBadge({ status }: { status: OrderStatus }) {
-  if (status === "shipped") return <Badge variant="purple">shipped</Badge>;
-  if (status === "completed") return <Badge variant="green">completed</Badge>;
-  if (status === "cancelled") return <Badge variant="red">cancelled</Badge>;
-  if (status === "processing") return <Badge>processing</Badge>;
-  return <Badge>new</Badge>;
+  if (status === "shipped") return <Badge variant="purple">dikirim</Badge>;
+  if (status === "completed") return <Badge variant="green">selesai</Badge>;
+  if (status === "cancelled") return <Badge variant="red">dibatalkan</Badge>;
+  if (status === "processing") return <Badge>diproses</Badge>;
+  return <Badge>baru</Badge>;
 }
 
 export default async function SellerOrderDetailPage({
@@ -88,7 +88,7 @@ export default async function SellerOrderDetailPage({
   return (
     <PageShell>
       <PageHeader
-        title="Manage Order"
+        title="Kelola Pesanan"
         badge={
           <div className="flex items-center gap-2">
             <PaymentBadge status={order.payment_status} />
@@ -98,8 +98,8 @@ export default async function SellerOrderDetailPage({
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "order", href: "/seller/orders" },
+              { label: "admin", href: "/seller" },
+              { label: "pesanan", href: "/seller/orders" },
               { label: order.order_number },
             ]}
           />
@@ -112,35 +112,35 @@ export default async function SellerOrderDetailPage({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="text-sm font-semibold text-(--st-text)">
-                Payment proof
+                Bukti pembayaran
               </div>
               <div className="mt-1 text-xs text-(--st-text-muted)">
-                Manual review for QRIS payments.
+                Review manual untuk pembayaran QRIS.
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <form action={verifyPaymentAction}>
                 <SubmitButton
-                  pendingText="Verifying..."
+                  pendingText="Memverifikasi..."
                   disabled={signedProofs.length === 0}
                 >
-                  Verify payment
+                  Verifikasi pembayaran
                 </SubmitButton>
               </form>
 
               <form action={rejectPaymentAction} className="flex items-center gap-2">
                 <Input
                   name="reject_note"
-                  placeholder="Reject reason (optional)"
+                  placeholder="Alasan tolak (opsional)"
                   className="h-10 w-60"
                 />
                 <SubmitButton
-                  pendingText="Rejecting..."
+                  pendingText="Menolak..."
                   variant="outline"
                   disabled={signedProofs.length === 0}
                 >
-                  Reject
+                  Tolak
                 </SubmitButton>
               </form>
             </div>
@@ -149,18 +149,18 @@ export default async function SellerOrderDetailPage({
           <div className="mt-4 flex flex-wrap gap-3">
             {signedProofs.length === 0 ? (
               <div className="text-sm text-(--st-text-muted)">
-                No proof submitted yet.
+                Belum ada bukti pembayaran.
               </div>
             ) : (
               signedProofs.map((p) => (
                 <div
                   key={p.id}
-                  className="w-[220px] overflow-hidden rounded-xl border border-(--st-border) bg-white"
+                  className="w-55 overflow-hidden rounded-xl border border-(--st-border) bg-white"
                 >
-                  <div className="relative aspect-[4/3] bg-[#F7F8FA]">
+                  <div className="relative aspect-4/3 bg-[#F7F8FA]">
                     <Image
                       src={p.signed_url}
-                      alt={p.original_name ?? "payment proof"}
+                      alt={p.original_name ?? "bukti pembayaran"}
                       fill
                       sizes="220px"
                       className="object-contain"
@@ -168,7 +168,7 @@ export default async function SellerOrderDetailPage({
                   </div>
                   <div className="p-3">
                     <div className="truncate text-xs font-medium text-(--st-text)">
-                      {p.original_name ?? "proof"}
+                      {p.original_name ?? "bukti pembayaran"}
                     </div>
                     <div className="mt-1 text-[11px] text-(--st-text-muted)">
                       {formatDateTime(p.created_at)}
@@ -183,7 +183,7 @@ export default async function SellerOrderDetailPage({
             <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
               <div>
                 <div className="text-xs font-medium text-(--st-text-muted)">
-                  Order total
+                  Total pesanan
                 </div>
                 <div className="mt-1 font-semibold text-(--st-text)">
                   {formatIDR(order.total_amount)}
@@ -191,7 +191,7 @@ export default async function SellerOrderDetailPage({
               </div>
               <div>
                 <div className="text-xs font-medium text-(--st-text-muted)">
-                  Payment status
+                  Status pembayaran
                 </div>
                 <div className="mt-1">
                   <PaymentBadge status={order.payment_status} />
@@ -199,7 +199,7 @@ export default async function SellerOrderDetailPage({
               </div>
               <div>
                 <div className="text-xs font-medium text-(--st-text-muted)">
-                  Pay by
+                  Batas bayar
                 </div>
                 <div className="mt-1 text-sm text-(--st-text)">
                   {order.pay_by ? formatDateTime(order.pay_by) : "—"}
@@ -214,14 +214,14 @@ export default async function SellerOrderDetailPage({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="text-sm font-semibold text-(--st-text)">
-                Order details
+                Detail pesanan
               </div>
               <div className="mt-1 text-xs text-(--st-text-muted)">
-                Update fulfillment and payment status in one place.
+                Update status pembayaran dan pemenuhan pesanan di satu tempat.
               </div>
             </div>
             <div className="text-right text-xs text-(--st-text-muted)">
-              Created: {formatDateTime(order.created_at)}
+              Dibuat: {formatDateTime(order.created_at)}
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export default async function SellerOrderDetailPage({
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-lg border border-(--st-border) p-4">
                 <div className="text-xs font-medium text-(--st-text-muted)">
-                  Customer
+                  Pelanggan
                 </div>
                 <div className="mt-2 text-sm font-semibold text-(--st-text)">
                   {order.customer_name}
@@ -244,7 +244,7 @@ export default async function SellerOrderDetailPage({
 
               <div className="rounded-lg border border-(--st-border) p-4">
                 <div className="text-xs font-medium text-(--st-text-muted)">
-                  Shipping
+                  Pengiriman
                 </div>
                 <div className="mt-2 text-sm text-(--st-text)">
                   {order.shipping_address?.line1 ?? "—"}
@@ -262,46 +262,46 @@ export default async function SellerOrderDetailPage({
 
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-(--st-text)">
-                  Payment status
+                  Status pembayaran
                 </label>
                 <select
                   name="payment_status"
                   defaultValue={order.payment_status}
                   className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
                 >
-                  <option value="unpaid">unpaid</option>
-                  <option value="submitted">submitted</option>
-                  <option value="verified">verified</option>
-                  <option value="rejected">rejected</option>
-                  <option value="expired">expired</option>
+                  <option value="unpaid">Belum bayar</option>
+                  <option value="submitted">Bukti masuk</option>
+                  <option value="verified">Terverifikasi</option>
+                  <option value="rejected">Ditolak</option>
+                  <option value="expired">Kedaluwarsa</option>
                 </select>
               </div>
 
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-(--st-text)">
-                  Order status
+                  Status pesanan
                 </label>
                 <select
                   name="status"
                   defaultValue={order.status}
                   className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
                 >
-                  <option value="new">new</option>
-                  <option value="processing">processing</option>
-                  <option value="shipped">shipped</option>
-                  <option value="completed">completed</option>
-                  <option value="cancelled">cancelled</option>
+                  <option value="new">Baru</option>
+                  <option value="processing">Diproses</option>
+                  <option value="shipped">Dikirim</option>
+                  <option value="completed">Selesai</option>
+                  <option value="cancelled">Dibatalkan</option>
                 </select>
               </div>
 
               <div className="md:col-span-2 grid gap-2">
                 <label className="text-sm font-medium text-(--st-text)">
-                  Admin note
+                  Catatan admin
                 </label>
                 <Textarea
                   name="admin_note"
                   defaultValue={order.admin_note ?? ""}
-                  placeholder="Internal notes (optional)"
+                  placeholder="Catatan internal (opsional)"
                 />
               </div>
             </div>
@@ -310,10 +310,10 @@ export default async function SellerOrderDetailPage({
               <table className="w-full text-sm">
                 <thead className="border-b border-(--st-border)">
                   <tr className="text-xs font-medium text-(--st-text-muted)">
-                    <th className="px-4 py-3 text-left">Product</th>
-                    <th className="px-4 py-3 text-left">Variant</th>
+                    <th className="px-4 py-3 text-left">Produk</th>
+                    <th className="px-4 py-3 text-left">Varian</th>
                     <th className="px-4 py-3 text-right">Qty</th>
-                    <th className="px-4 py-3 text-right">Price</th>
+                    <th className="px-4 py-3 text-right">Harga</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -337,7 +337,7 @@ export default async function SellerOrderDetailPage({
             </div>
 
             <div className="flex items-center justify-end">
-              <SubmitButton pendingText="Saving...">Save changes</SubmitButton>
+              <SubmitButton pendingText="Menyimpan...">Simpan perubahan</SubmitButton>
             </div>
           </form>
         </section>

@@ -145,7 +145,7 @@ export default async function OrderDetailMvpPage({
       <StoreHeader title="Pembayaran" backHref="/orders" />
 
       <main className="px-5 pb-6">
-        <section className="mt-4 rounded-[24px] border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
+        <section className="mt-4 rounded-3xl border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-xs font-medium text-(--st-text-muted)">Order</div>
@@ -197,7 +197,7 @@ export default async function OrderDetailMvpPage({
           </div>
         </section>
 
-        <section className="mt-4 rounded-[24px] border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
+        <section className="mt-4 rounded-3xl border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
           <div className="text-sm font-semibold text-(--st-text)">Bayar via QRIS</div>
           <div className="mt-1 text-sm text-(--st-text-muted)">
             Scan QRIS toko, bayar sesuai total, lalu upload bukti bayar.

@@ -14,7 +14,7 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
             {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="text-[color:var(--st-text-muted)] hover:text-[color:var(--st-text)]"
+                className="text-(--st-text-muted) hover:text-(--st-text)"
               >
                 {item.label}
               </Link>
@@ -22,15 +22,15 @@ export function Breadcrumb({ items }: { items: Crumb[] }) {
               <span
                 className={
                   isLast
-                    ? "text-[color:var(--st-text)]"
-                    : "text-[color:var(--st-text-muted)]"
+                    ? "text-(--st-text)"
+                    : "text-(--st-text-muted)"
                 }
               >
                 {item.label}
               </span>
             )}
             {!isLast ? (
-              <ChevronRight className="h-3.5 w-3.5 text-[color:var(--st-text-muted)]" />
+              <ChevronRight className="h-3.5 w-3.5 text-(--st-text-muted)" />
             ) : null}
           </div>
         );

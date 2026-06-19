@@ -131,7 +131,7 @@ export function ProductEditForm({
 
     if (files.length > 5) {
       setImageWarning(
-        "You selected more than 5 images. Only the first 5 will be uploaded."
+        "Kamu memilih lebih dari 5 gambar. Hanya 5 gambar pertama yang akan di-upload."
       );
     } else {
       setImageWarning(null);
@@ -144,7 +144,7 @@ export function ProductEditForm({
 
     if (totalMb > SAFE_CLIENT_MB) {
       setImageSizeError(
-        `Selected images are ~${totalMb.toFixed(1)} MB. This may exceed the Server Action upload limit (${MAX_ACTION_BODY_MB} MB). Please choose smaller files.`
+        `Total gambar ~${totalMb.toFixed(1)} MB. Ini bisa melewati batas upload Server Action (${MAX_ACTION_BODY_MB} MB). Pilih file yang lebih kecil.`
       );
     } else {
       setImageSizeError(null);
@@ -189,10 +189,10 @@ export function ProductEditForm({
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-sm font-semibold text-(--st-text)">
-              Product images
+              Gambar produk
             </div>
             <div className="mt-1 text-xs text-(--st-text-muted)">
-              Existing images are shown first. You can remove them and upload new ones.
+              Gambar yang sudah ada ditampilkan lebih dulu. Kamu bisa hapus lalu upload gambar baru.
             </div>
           </div>
         </div>
@@ -200,18 +200,18 @@ export function ProductEditForm({
         <div className="mt-4 flex flex-wrap gap-3">
           {existingImagesVisible.length === 0 ? (
             <div className="text-xs text-(--st-text-muted)">
-              No images uploaded yet.
+              Belum ada gambar yang di-upload.
             </div>
           ) : (
             existingImagesVisible.map((img) => (
               <div
                 key={img.id}
-                className="w-[140px] overflow-hidden rounded-lg border border-(--st-border) bg-white"
+                className="w-35 overflow-hidden rounded-lg border border-(--st-border) bg-white"
               >
                 <div className="relative aspect-square bg-[#F7F8FA]">
                   <Image
                     src={img.url}
-                    alt="Product image"
+                    alt="Gambar produk"
                     fill
                     sizes="140px"
                     className="object-cover"
@@ -219,7 +219,7 @@ export function ProductEditForm({
                 </div>
                 <div className="flex items-center justify-between gap-2 p-2">
                   <div className="truncate text-[11px] text-(--st-text-muted)">
-                    {img.sort_order === 0 ? "Primary" : `#${img.sort_order + 1}`}
+                    {img.sort_order === 0 ? "Utama" : `#${img.sort_order + 1}`}
                   </div>
                   <Button
                     type="button"
@@ -227,7 +227,7 @@ export function ProductEditForm({
                     variant="ghost"
                     className="h-8 w-8"
                     onClick={() => removeImage(img.id)}
-                    aria-label="Remove image"
+                    aria-label="Hapus gambar"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -239,10 +239,10 @@ export function ProductEditForm({
 
         <div className="mt-5">
           <div className="text-sm font-semibold text-(--st-text)">
-            Upload new images
+            Upload gambar baru
           </div>
           <div className="mt-1 text-xs text-(--st-text-muted)">
-            Upload up to 5 images per update.
+            Upload maksimal 5 gambar per update.
           </div>
           {imageWarning ? (
             <div className="mt-2 text-xs text-[#B45309]">{imageWarning}</div>
@@ -254,7 +254,7 @@ export function ProductEditForm({
           <div className="mt-3">
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-(--st-border) bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-(--st-text) hover:bg-[#F7F8FA]/70">
               <Upload className="h-4 w-4" />
-              Choose files
+              Pilih file
               <input
                 name="images"
                 type="file"
@@ -301,13 +301,13 @@ export function ProductEditForm({
       {/* Product fields */}
       <section className="rounded-xl border border-(--st-border) bg-white p-6">
         <div className="text-sm font-semibold text-(--st-text)">
-          Product info
+          Info produk
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <label className="text-sm font-medium text-(--st-text)">
-              Product name
+              Nama produk
             </label>
             <Input
               name="name"
@@ -334,11 +334,11 @@ export function ProductEditForm({
 
           <div className="grid gap-2">
             <label className="text-sm font-medium text-(--st-text)">
-              Category
+              Kategori
             </label>
             <Select value={categoryId} onValueChange={setCategoryId}>
               <SelectTrigger className="h-10">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
@@ -363,14 +363,14 @@ export function ProductEditForm({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="active">Aktif</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid gap-2">
             <label className="text-sm font-medium text-(--st-text)">
-              Price (IDR)
+              Harga (IDR)
             </label>
             <Input
               name="price"
@@ -385,12 +385,12 @@ export function ProductEditForm({
 
           <div className="grid gap-2 md:col-span-2">
             <label className="text-sm font-medium text-(--st-text)">
-              Description
+              Deskripsi
             </label>
             <Textarea
               name="description"
               defaultValue={defaultValues.product.description ?? ""}
-              placeholder="Material, fit, and care instructions..."
+              placeholder="Bahan, fit, kondisi, dan catatan perawatan..."
             />
           </div>
         </div>
@@ -401,23 +401,23 @@ export function ProductEditForm({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-(--st-text)">
-              Sizes & stock
+              Ukuran & stok
             </div>
             <div className="mt-1 text-xs text-(--st-text-muted)">
-              Stock is per size.
+              Stok dihitung per ukuran.
             </div>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addVariant}>
             <Plus className="h-4 w-4" />
-            Add size
+            Tambah ukuran
           </Button>
         </div>
 
         <div className="mt-4 grid gap-2">
           <div className="grid grid-cols-[1fr_140px_120px_44px] gap-2 text-xs font-medium text-(--st-text-muted)">
-            <div className="px-1">Size</div>
-            <div className="px-1">Stock</div>
-            <div className="px-1">Active</div>
+            <div className="px-1">Ukuran</div>
+            <div className="px-1">Stok</div>
+            <div className="px-1">Aktif</div>
             <div />
           </div>
 
@@ -451,7 +451,7 @@ export function ProductEditForm({
                   checked={v.is_active}
                   onChange={(e) => updateVariant(idx, { is_active: e.target.checked })}
                 />
-                <span className="text-sm text-(--st-text)">Active</span>
+                <span className="text-sm text-(--st-text)">Aktif</span>
                 <input
                   type="hidden"
                   name="variant_is_active"
@@ -463,7 +463,7 @@ export function ProductEditForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeVariant(idx)}
-                aria-label="Remove size"
+                aria-label="Hapus ukuran"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -473,8 +473,8 @@ export function ProductEditForm({
       </section>
 
       <div className="flex items-center justify-end gap-2">
-        <SubmitButton pendingText="Saving..." disabled={Boolean(imageSizeError)}>
-          Save changes
+        <SubmitButton pendingText="Menyimpan..." disabled={Boolean(imageSizeError)}>
+          Simpan perubahan
         </SubmitButton>
       </div>
     </form>

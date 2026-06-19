@@ -74,7 +74,7 @@ export function ProductForm({
 
     // Only the first 5 will be uploaded; warn early to avoid accidental huge submits.
     if (files.length > 5) {
-      setImageWarning("You selected more than 5 images. Only the first 5 will be uploaded.");
+      setImageWarning("Kamu memilih lebih dari 5 gambar. Hanya 5 gambar pertama yang akan di-upload.");
     } else {
       setImageWarning(null);
     }
@@ -86,7 +86,7 @@ export function ProductForm({
 
     if (totalMb > SAFE_CLIENT_MB) {
       setImageSizeError(
-        `Selected images are ~${totalMb.toFixed(1)} MB. This may exceed the Server Action upload limit (${MAX_ACTION_BODY_MB} MB). Please choose smaller files.`
+        `Total gambar ~${totalMb.toFixed(1)} MB. Ini bisa melewati batas upload Server Action (${MAX_ACTION_BODY_MB} MB). Pilih file yang lebih kecil.`
       );
     } else {
       setImageSizeError(null);
@@ -130,7 +130,7 @@ export function ProductForm({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="grid gap-2">
           <label className="text-sm font-medium text-(--st-text)">
-            Product name
+            Nama produk
           </label>
           <Input
             name="name"
@@ -159,12 +159,12 @@ export function ProductForm({
 
         <div className="grid gap-2">
           <label className="text-sm font-medium text-(--st-text)">
-            Category
+            Kategori
           </label>
           <input type="hidden" name="category_id" value={categoryId} />
           <Select value={categoryId} onValueChange={setCategoryId}>
             <SelectTrigger className="h-10">
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder="Pilih kategori" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((c) => (
@@ -176,7 +176,7 @@ export function ProductForm({
           </Select>
           {categories.length === 0 ? (
             <p className="text-xs text-(--st-text-muted)">
-              Create a category first.
+              Buat kategori dulu.
             </p>
           ) : null}
         </div>
@@ -195,14 +195,14 @@ export function ProductForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="active">Aktif</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="grid gap-2">
           <label className="text-sm font-medium text-(--st-text)">
-            Price (IDR)
+            Harga (IDR)
           </label>
           <Input
             name="price"
@@ -214,17 +214,17 @@ export function ProductForm({
             required
           />
           <p className="text-xs text-(--st-text-muted)">
-            Stored as numeric. Use plain number without separators.
+            Simpan sebagai angka biasa, tanpa titik/koma pemisah.
           </p>
         </div>
 
         <div className="grid gap-2 md:col-span-2">
           <label className="text-sm font-medium text-(--st-text)">
-            Description
+            Deskripsi
           </label>
           <Textarea
             name="description"
-            placeholder="Material, fit, and care instructions..."
+            placeholder="Bahan, fit, kondisi, dan catatan perawatan..."
           />
         </div>
       </div>
@@ -233,22 +233,22 @@ export function ProductForm({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-(--st-text)">
-              Sizes & stock
+              Ukuran & stok
             </div>
             <div className="mt-1 text-xs text-(--st-text-muted)">
-              Add size labels freely (S/M/L, 42, One Size). Stock is per size.
+              Label ukuran bebas (S/M/L, 42, One Size). Stok dihitung per ukuran.
             </div>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addVariant}>
             <Plus className="h-4 w-4" />
-            Add size
+            Tambah ukuran
           </Button>
         </div>
 
         <div className="mt-4 grid gap-2">
           <div className="grid grid-cols-[1fr_140px_44px] gap-2 text-xs font-medium text-(--st-text-muted)">
-            <div className="px-1">Size</div>
-            <div className="px-1">Stock</div>
+            <div className="px-1">Ukuran</div>
+            <div className="px-1">Stok</div>
             <div />
           </div>
 
@@ -280,7 +280,7 @@ export function ProductForm({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeVariant(idx)}
-                aria-label="Remove size"
+                aria-label="Hapus ukuran"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -291,10 +291,10 @@ export function ProductForm({
 
       <div className="rounded-lg border border-(--st-border) p-4">
         <div className="text-sm font-semibold text-(--st-text)">
-          Images
+          Gambar
         </div>
         <div className="mt-1 text-xs text-(--st-text-muted)">
-          Upload up to 5 images. Recommended: WebP/JPG, square-ish framing.
+          Upload maksimal 5 gambar. Rekomendasi: WebP/JPG dengan framing mendekati persegi.
         </div>
         {imageWarning ? (
           <div className="mt-2 text-xs text-[#B45309]">{imageWarning}</div>
@@ -306,7 +306,7 @@ export function ProductForm({
         <div className="mt-4">
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-(--st-border) bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-(--st-text) hover:bg-[#F7F8FA]/70">
             <Upload className="h-4 w-4" />
-            Choose files
+            Pilih file
             <input
               name="images"
               type="file"
@@ -348,17 +348,17 @@ export function ProductForm({
           </div>
         ) : (
           <div className="mt-3 text-xs text-(--st-text-muted)">
-            No images selected.
+            Belum ada gambar dipilih.
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-end gap-2">
         <SubmitButton
-          pendingText="Creating..."
+          pendingText="Membuat..."
           disabled={categories.length === 0 || Boolean(imageSizeError)}
         >
-          Create product
+          Buat produk
         </SubmitButton>
       </div>
     </form>

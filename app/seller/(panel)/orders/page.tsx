@@ -24,19 +24,19 @@ import { adminListOrders } from "@/lib/orders/admin";
 import type { OrderStatus, PaymentStatus } from "@/lib/orders/types";
 
 function PaymentBadge({ status }: { status: PaymentStatus }) {
-  if (status === "verified") return <Badge variant="green">verified</Badge>;
-  if (status === "submitted") return <Badge variant="amber">submitted</Badge>;
-  if (status === "rejected") return <Badge variant="red">rejected</Badge>;
-  if (status === "expired") return <Badge variant="red">expired</Badge>;
-  return <Badge variant="neutral">unpaid</Badge>;
+  if (status === "verified") return <Badge variant="green">terverifikasi</Badge>;
+  if (status === "submitted") return <Badge variant="amber">menunggu review</Badge>;
+  if (status === "rejected") return <Badge variant="red">ditolak</Badge>;
+  if (status === "expired") return <Badge variant="red">kedaluwarsa</Badge>;
+  return <Badge variant="neutral">belum bayar</Badge>;
 }
 
 function OrderBadge({ status }: { status: OrderStatus }) {
-  if (status === "shipped") return <Badge variant="purple">shipped</Badge>;
-  if (status === "completed") return <Badge variant="green">completed</Badge>;
-  if (status === "cancelled") return <Badge variant="red">cancelled</Badge>;
-  if (status === "processing") return <Badge>processing</Badge>;
-  return <Badge>new</Badge>;
+  if (status === "shipped") return <Badge variant="purple">dikirim</Badge>;
+  if (status === "completed") return <Badge variant="green">selesai</Badge>;
+  if (status === "cancelled") return <Badge variant="red">dibatalkan</Badge>;
+  if (status === "processing") return <Badge>diproses</Badge>;
+  return <Badge>baru</Badge>;
 }
 
 export default async function OrdersPage({
@@ -64,15 +64,15 @@ export default async function OrdersPage({
   return (
     <PageShell>
       <PageHeader
-        title="Order"
+        title="Pesanan"
         breadcrumb={
           <Breadcrumb
-            items={[{ label: "seller", href: "/seller" }, { label: "order" }]}
+            items={[{ label: "admin", href: "/seller" }, { label: "pesanan" }]}
           />
         }
         right={
           <Button asChild variant="outline">
-            <Link href="/products">Open storefront</Link>
+            <Link href="/products">Buka storefront</Link>
           </Button>
         }
       />
@@ -81,7 +81,7 @@ export default async function OrdersPage({
         <form className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full md:max-w-90">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--st-text-muted)" />
-            <Input name="q" defaultValue={q} placeholder="Search orders" className="pl-9" />
+            <Input name="q" defaultValue={q} placeholder="Cari pesanan" className="pl-9" />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -90,12 +90,12 @@ export default async function OrdersPage({
               defaultValue={payment_status}
               className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
             >
-              <option value="all">All payments</option>
-              <option value="unpaid">Unpaid</option>
-              <option value="submitted">Submitted</option>
-              <option value="verified">Verified</option>
-              <option value="rejected">Rejected</option>
-              <option value="expired">Expired</option>
+              <option value="all">Semua pembayaran</option>
+              <option value="unpaid">Belum bayar</option>
+              <option value="submitted">Bukti masuk</option>
+              <option value="verified">Terverifikasi</option>
+              <option value="rejected">Ditolak</option>
+              <option value="expired">Kedaluwarsa</option>
             </select>
 
             <select
@@ -103,12 +103,12 @@ export default async function OrdersPage({
               defaultValue={status}
               className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
             >
-              <option value="all">All orders</option>
-              <option value="new">New</option>
-              <option value="processing">Processing</option>
-              <option value="shipped">Shipped</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="all">Semua pesanan</option>
+              <option value="new">Baru</option>
+              <option value="processing">Diproses</option>
+              <option value="shipped">Dikirim</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
             </select>
 
             <Button type="submit" className="h-10">
@@ -120,13 +120,13 @@ export default async function OrdersPage({
         <div className="mt-4">
           <div className="grid gap-2 rounded-lg border border-(--st-border) bg-[#F7F8FA] p-3 text-xs text-(--st-text-muted) md:grid-cols-3">
             <div>
-              Total results: <span className="font-medium text-(--st-text)">{total}</span>
+              Total data: <span className="font-medium text-(--st-text)">{total}</span>
             </div>
             <div>
-              Page size: <span className="font-medium text-(--st-text)">{result.pageSize}</span>
+              Per halaman: <span className="font-medium text-(--st-text)">{result.pageSize}</span>
             </div>
             <div>
-              Tip: use filters to narrow results.
+              Tips: gunakan filter untuk mempersempit hasil.
             </div>
           </div>
         </div>
@@ -135,20 +135,20 @@ export default async function OrdersPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
+                <TableHead>Pesanan</TableHead>
+                <TableHead>Pelanggan</TableHead>
                 <TableHead className="w-40">Total</TableHead>
-                <TableHead className="w-40">Payment</TableHead>
+                <TableHead className="w-40">Pembayaran</TableHead>
                 <TableHead className="w-35">Status</TableHead>
-                <TableHead className="w-45">Created</TableHead>
-                <TableHead className="w-30">Action</TableHead>
+                <TableHead className="w-45">Dibuat</TableHead>
+                <TableHead className="w-30">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-sm text-(--st-text-muted)">
-                    No orders.
+                    Belum ada pesanan.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -178,7 +178,7 @@ export default async function OrdersPage({
                         href={`/seller/orders/${o.id}`}
                         className="inline-flex items-center gap-1 text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                       >
-                        Manage
+                        Kelola
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </TableCell>
@@ -206,7 +206,7 @@ export default async function OrdersPage({
         />
 
         <p className="mt-3 text-xs text-(--st-text-muted)">
-          Tip: filter payment = <span className="font-medium text-(--st-text)">submitted</span> to review new payment proofs.
+          Tips: filter pembayaran = <span className="font-medium text-(--st-text)">submitted</span> untuk review bukti bayar baru.
         </p>
       </section>
     </PageShell>

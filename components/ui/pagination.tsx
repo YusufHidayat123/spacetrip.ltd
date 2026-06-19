@@ -22,34 +22,34 @@ export function Pagination({
 
   return (
     <div className={cn("flex items-center justify-between gap-3", className)}>
-      <div className="text-xs text-[color:var(--st-text-muted)]">
-        Page <span className="font-medium text-[color:var(--st-text)]">{page}</span> of {totalPages} · {total} items
+      <div className="text-xs text-(--st-text-muted)">
+        Halaman <span className="font-medium text-(--st-text)">{page}</span> dari {totalPages} · {total} item
       </div>
 
       <div className="flex items-center gap-2">
         {prevDisabled ? (
-          <span className="rounded-md border border-[color:var(--st-border)] bg-white px-3 py-1.5 text-xs text-[color:var(--st-text-muted)] opacity-50">
-            Prev
+          <span className="rounded-md border border-(--st-border) bg-white px-3 py-1.5 text-xs text-(--st-text-muted) opacity-50">
+            Sebelumnya
           </span>
         ) : (
           <Link
             href={href(page - 1)}
-            className="rounded-md border border-[color:var(--st-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--st-text)] hover:bg-[#F7F8FA]"
+            className="rounded-md border border-(--st-border) bg-white px-3 py-1.5 text-xs font-medium text-(--st-text) hover:bg-[#F7F8FA]"
           >
-            Prev
+            Sebelumnya
           </Link>
         )}
 
         {nextDisabled ? (
-          <span className="rounded-md border border-[color:var(--st-border)] bg-white px-3 py-1.5 text-xs text-[color:var(--st-text-muted)] opacity-50">
-            Next
+          <span className="rounded-md border border-(--st-border) bg-white px-3 py-1.5 text-xs text-(--st-text-muted) opacity-50">
+            Berikutnya
           </span>
         ) : (
           <Link
             href={href(page + 1)}
-            className="rounded-md border border-[color:var(--st-border)] bg-white px-3 py-1.5 text-xs font-medium text-[color:var(--st-text)] hover:bg-[#F7F8FA]"
+            className="rounded-md border border-(--st-border) bg-white px-3 py-1.5 text-xs font-medium text-(--st-text) hover:bg-[#F7F8FA]"
           >
-            Next
+            Berikutnya
           </Link>
         )}
       </div>

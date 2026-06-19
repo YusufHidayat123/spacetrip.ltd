@@ -45,7 +45,7 @@ export default async function NewProductPage() {
     };
 
     const parsed = productSchema.safeParse(values);
-    if (!parsed.success) throw new Error("Invalid product input");
+    if (!parsed.success) throw new Error("Input produk tidak valid");
 
     const created = await adminCreateProduct({
       ...parsed.data,
@@ -77,13 +77,13 @@ export default async function NewProductPage() {
   return (
     <PageShell>
       <PageHeader
-        title="New Product"
+        title="Produk Baru"
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "catalog", href: "/seller/products" },
-              { label: "new" },
+              { label: "admin", href: "/seller" },
+              { label: "katalog", href: "/seller/products" },
+              { label: "baru" },
             ]}
           />
         }

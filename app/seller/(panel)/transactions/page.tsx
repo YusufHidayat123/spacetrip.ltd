@@ -41,24 +41,24 @@ export default async function TransactionsPage({
   return (
     <PageShell>
       <PageHeader
-        title="Transaction"
+        title="Transaksi"
         badge={
           <Badge variant={total > 0 ? "amber" : "neutral"}>
-            {total} to review
+            {total} perlu review
           </Badge>
         }
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "transaction" },
+              { label: "admin", href: "/seller" },
+              { label: "transaksi" },
             ]}
           />
         }
         right={
           <Button asChild variant="outline">
             <Link href="/seller/orders?payment_status=submitted">
-              Open Orders view
+              Buka view Pesanan
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -67,12 +67,12 @@ export default async function TransactionsPage({
 
       <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
         <form className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-[360px]">
+          <div className="relative w-full md:max-w-90">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--st-text-muted)" />
-            <Input name="q" defaultValue={q} placeholder="Search" className="pl-9" />
+            <Input name="q" defaultValue={q} placeholder="Cari" className="pl-9" />
           </div>
           <Button type="submit" className="h-10">
-            Search
+            Cari
           </Button>
         </form>
 
@@ -80,11 +80,11 @@ export default async function TransactionsPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead className="w-[160px]">Total</TableHead>
-                <TableHead className="w-[180px]">Created</TableHead>
-                <TableHead className="w-[140px]">Action</TableHead>
+                <TableHead>Pesanan</TableHead>
+                <TableHead>Pelanggan</TableHead>
+                <TableHead className="w-40">Total</TableHead>
+                <TableHead className="w-45">Dibuat</TableHead>
+                <TableHead className="w-35">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,7 +94,7 @@ export default async function TransactionsPage({
                     colSpan={5}
                     className="text-sm text-(--st-text-muted)"
                   >
-                    No submitted payments to review.
+                    Belum ada bukti pembayaran yang perlu direview.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -141,7 +141,7 @@ export default async function TransactionsPage({
         />
 
         <p className="mt-3 text-xs text-(--st-text-muted)">
-          This page is optional. Primary workflow is still in Orders detail.
+          Halaman ini opsional. Workflow utama tetap ada di detail Pesanan.
         </p>
       </section>
     </PageShell>

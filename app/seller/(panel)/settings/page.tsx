@@ -15,7 +15,7 @@ import { QrisUploadField } from "./_components/qris-upload-field";
 
 function getPublicObjectUrl(bucket: string, storagePath: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
+  if (!url) throw new Error("NEXT_PUBLIC_SUPABASE_URL belum diatur");
   return `${url}/storage/v1/object/public/${bucket}/${storagePath}`;
 }
 
@@ -42,7 +42,7 @@ export default async function SettingsPage() {
       qris_image_url = null;
     } else if (file && file.size > 0) {
       const maxBytes = 8 * 1024 * 1024;
-      if (file.size > maxBytes) throw new Error("QRIS image is too large (max ~8MB)");
+      if (file.size > maxBytes) throw new Error("Gambar QRIS terlalu besar (maks ~8MB)");
 
       const bucket = process.env.SUPABASE_STORE_ASSETS_BUCKET || "store-assets";
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
@@ -76,12 +76,12 @@ export default async function SettingsPage() {
   return (
     <PageShell>
       <PageHeader
-        title="Setting"
+        title="Pengaturan"
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "setting" },
+              { label: "admin", href: "/seller" },
+              { label: "pengaturan" },
             ]}
           />
         }
@@ -89,7 +89,7 @@ export default async function SettingsPage() {
 
       <div className="mt-6 grid gap-6">
         <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-          <div className="text-sm font-semibold text-(--st-text)">Store settings</div>
+          <div className="text-sm font-semibold text-(--st-text)">Pengaturan toko</div>
           <div className="mt-1 text-xs text-(--st-text-muted)">
             Untuk checkout manual: QRIS + instruksi pembayaran.
           </div>
@@ -116,7 +116,7 @@ export default async function SettingsPage() {
 
             <div className="grid gap-2">
               <div className="flex items-center justify-between gap-3">
-                <label className="text-sm font-medium text-(--st-text)">QRIS image</label>
+                <label className="text-sm font-medium text-(--st-text)">Gambar QRIS</label>
                 <label className="inline-flex items-center gap-2 text-xs text-(--st-text-muted)">
                   <input type="checkbox" name="qris_clear" />
                   Hapus QRIS
@@ -127,13 +127,13 @@ export default async function SettingsPage() {
 
             <div className="flex items-center justify-end gap-2">
               <Button asChild variant="outline">
-                <a href="/seller">Back</a>
+                <a href="/seller">Kembali</a>
               </Button>
               <SubmitButton pendingText="Menyimpan...">Simpan</SubmitButton>
             </div>
 
             <div className="text-[11px] text-(--st-text-muted)">
-              Catatan: bucket yang dipakai default `store-assets` (public). Bisa diganti via env `SUPABASE_STORE_ASSETS_BUCKET`.
+              Catatan: bucket default yang dipakai adalah `store-assets` (public). Bisa diganti via env `SUPABASE_STORE_ASSETS_BUCKET`.
             </div>
           </form>
         </section>

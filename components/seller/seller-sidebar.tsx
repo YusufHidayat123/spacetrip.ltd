@@ -39,14 +39,14 @@ function getNavItems(counts: SidebarCounts): NavItem[] {
   return [
     { label: "Dashboard", href: "/seller", icon: LayoutGrid },
     {
-      label: "Order",
+      label: "Pesanan",
       href: "/seller/orders",
       icon: ClipboardList,
       // Show new orders as a badge (most actionable)
       badge: counts.newOrders > 0 ? String(counts.newOrders) : undefined,
     },
     {
-      label: "Transaction",
+      label: "Transaksi",
       href: "/seller/transactions",
       icon: BadgeDollarSign,
       // Since payments are manual, this is the closest signal we have.
@@ -55,9 +55,9 @@ function getNavItems(counts: SidebarCounts): NavItem[] {
           ? String(counts.paymentToReview)
           : undefined,
     },
-    { label: "Catalog", href: "/seller/products", icon: ShoppingBag },
-    { label: "Category", href: "/seller/categories", icon: Shapes },
-    { label: "Setting", href: "/seller/settings", icon: Settings },
+    { label: "Katalog", href: "/seller/products", icon: ShoppingBag },
+    { label: "Kategori", href: "/seller/categories", icon: Shapes },
+    { label: "Pengaturan", href: "/seller/settings", icon: Settings },
   ];
 }
 
@@ -88,29 +88,29 @@ export function SellerSidebar({
   const initial = (email?.[0] ?? "A").toUpperCase();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 w-[272px] border-r border-[color:var(--st-border)] bg-white">
+    <aside className="fixed inset-y-0 left-0 z-40 w-68 border-r border-(--st-border) bg-white">
       <div className="flex h-full flex-col">
         <div className="px-4 pt-4">
           <Link href="/seller" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color:var(--st-accent)] text-black shadow-[0_1px_0_rgba(17,24,39,0.04)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-(--st-accent) text-black shadow-[0_1px_0_rgba(17,24,39,0.04)]">
               <Rocket className="h-4 w-4" />
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold tracking-tight text-[color:var(--st-text)]">
+              <div className="text-sm font-semibold tracking-tight text-(--st-text)">
                 spacetrip
               </div>
-              <div className="text-xs text-[color:var(--st-text-muted)]">
-                Admin Console
+              <div className="text-xs text-(--st-text-muted)">
+                Konsol Admin
               </div>
             </div>
           </Link>
 
           <div className="mt-4">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--st-text-muted)]" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--st-text-muted)" />
               <Input
-                aria-label="Search"
-                placeholder="Search"
+                aria-label="Cari"
+                placeholder="Cari"
                 className="h-9 pl-9"
               />
             </div>
@@ -133,23 +133,23 @@ export function SellerSidebar({
                   className={cn(
                     "relative flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
                     active
-                      ? "border border-[color:var(--st-accent-border)] bg-[color:var(--st-accent-soft)] text-[color:var(--st-text)]"
-                      : "text-[color:var(--st-text-muted)] hover:bg-[#F7F8FA] hover:text-[color:var(--st-text)]"
+                      ? "border border-(--st-accent-border) bg-(--st-accent-soft) text-(--st-text)"
+                      : "text-(--st-text-muted) hover:bg-[#F7F8FA] hover:text-(--st-text)"
                   )}
                 >
                   <span
                     aria-hidden="true"
                     className={cn(
-                      "absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full",
-                      active ? "bg-[color:var(--st-accent)]" : "bg-transparent"
+                      "absolute left-0 top-1/2 h-5 w-0.75 -translate-y-1/2 rounded-r-full",
+                      active ? "bg-(--st-accent)" : "bg-transparent"
                     )}
                   />
                   <Icon
                     className={cn(
                       "h-4 w-4",
                       active
-                        ? "text-[color:var(--st-text)]"
-                        : "text-[color:var(--st-text-muted)]"
+                        ? "text-(--st-text)"
+                        : "text-(--st-text-muted)"
                     )}
                   />
                   <span className="flex-1">{item.label}</span>
@@ -158,8 +158,8 @@ export function SellerSidebar({
                       className={cn(
                         "inline-flex items-center rounded-full border px-2 py-0.5 text-xs",
                         active
-                          ? "border-[color:var(--st-accent-border)] bg-white text-[color:var(--st-text)]"
-                          : "border-[color:var(--st-border)] bg-white text-[color:var(--st-text-muted)]"
+                          ? "border-(--st-accent-border) bg-white text-(--st-text)"
+                          : "border-(--st-border) bg-white text-(--st-text-muted)"
                       )}
                     >
                       {item.badge}
@@ -177,30 +177,30 @@ export function SellerSidebar({
 
         <div className="px-4 pb-4">
           <Separator />
-          <div className="mt-4 flex items-center gap-3 rounded-md border border-[color:var(--st-border)] bg-white px-3 py-2 shadow-[0_1px_0_rgba(17,24,39,0.03)]">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--st-accent-border)] bg-[color:var(--st-accent-soft)] text-sm font-semibold text-[color:var(--st-text)]">
+          <div className="mt-4 flex items-center gap-3 rounded-md border border-(--st-border) bg-white px-3 py-2 shadow-[0_1px_0_rgba(17,24,39,0.03)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-(--st-accent-border) bg-(--st-accent-soft) text-sm font-semibold text-(--st-text)">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-[color:var(--st-text)]">
+              <div className="truncate text-sm font-semibold text-(--st-text)">
                 Admin
               </div>
-              <div className="truncate text-xs text-[color:var(--st-text-muted)]">
+              <div className="truncate text-xs text-(--st-text-muted)">
                 {email}
               </div>
             </div>
             <button
               type="button"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[color:var(--st-text-muted)] transition-colors hover:bg-[#F7F8FA] hover:text-[color:var(--st-text)]"
-              aria-label="Account menu"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-(--st-text-muted) transition-colors hover:bg-[#F7F8FA] hover:text-(--st-text)"
+              aria-label="Menu akun"
             >
               <ChevronDown className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={logout}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[color:var(--st-text-muted)] transition-colors hover:bg-[#F7F8FA] hover:text-[color:var(--st-text)]"
-              aria-label="Logout"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-(--st-text-muted) transition-colors hover:bg-[#F7F8FA] hover:text-(--st-text)"
+              aria-label="Keluar"
             >
               <LogOut className="h-4 w-4" />
             </button>

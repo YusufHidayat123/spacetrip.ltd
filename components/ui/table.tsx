@@ -22,7 +22,7 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
-    className={cn("[&_tr]:border-b border-[color:var(--st-border)]", className)}
+    className={cn("[&_tr]:border-b border-(--st-border)", className)}
     {...props}
   />
 ));
@@ -47,7 +47,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t border-[color:var(--st-border)] bg-[#F7F8FA] font-medium",
+      "border-t border-(--st-border) bg-[#F7F8FA] font-medium",
       className
     )}
     {...props}
@@ -62,7 +62,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b border-[color:var(--st-border)] transition-colors hover:bg-[#F7F8FA]/70",
+      "border-b border-(--st-border) transition-colors hover:bg-[#F7F8FA]/70",
       className
     )}
     {...props}
@@ -77,7 +77,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle text-xs font-medium text-[color:var(--st-text-muted)]",
+      "h-12 px-4 text-left align-middle text-xs font-medium text-(--st-text-muted)",
       className
     )}
     {...props}
@@ -91,7 +91,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle text-[color:var(--st-text)]", className)}
+    className={cn("p-4 align-middle text-(--st-text)", className)}
     {...props}
   />
 ));
@@ -103,7 +103,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-[color:var(--st-text-muted)]", className)}
+    className={cn("mt-4 text-sm text-(--st-text-muted)", className)}
     {...props}
   />
 ));

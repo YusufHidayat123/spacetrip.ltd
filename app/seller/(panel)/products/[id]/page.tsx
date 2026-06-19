@@ -76,7 +76,7 @@ export default async function ProductDetailPage({
     };
 
     const parsed = productUpdateSchema.safeParse(values);
-    if (!parsed.success) throw new Error("Invalid product update input");
+    if (!parsed.success) throw new Error("Input update produk tidak valid");
 
     await adminUpdateProduct(id, {
       category_id: parsed.data.category_id,
@@ -128,13 +128,13 @@ export default async function ProductDetailPage({
   return (
     <PageShell>
       <PageHeader
-        title="Manage Product"
-        badge={<Badge>{product.status}</Badge>}
+        title="Kelola Produk"
+        badge={<Badge>{product.status === "active" ? "Aktif" : "Draft"}</Badge>}
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "catalog", href: "/seller/products" },
+              { label: "admin", href: "/seller" },
+              { label: "katalog", href: "/seller/products" },
               { label: product.name },
             ]}
           />

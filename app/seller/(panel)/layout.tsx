@@ -45,7 +45,7 @@ export default async function SellerPanelLayout({
   return (
     <div className="min-h-screen bg-(--st-bg)">
       <SellerSidebar counts={counts} />
-      <div className="pl-[272px]">
+      <div className="pl-68">
         <main className="min-h-screen">{children}</main>
       </div>
     </div>

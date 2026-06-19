@@ -22,13 +22,13 @@ export function PageHeader({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-[22px] font-semibold tracking-tight text-[color:var(--st-text)]">
+            <h1 className="text-[22px] font-semibold tracking-tight text-(--st-text)">
               {title}
             </h1>
             {badge}
           </div>
           {description ? (
-            <p className="mt-1 text-sm text-[color:var(--st-text-muted)]">
+            <p className="mt-1 text-sm text-(--st-text-muted)">
               {description}
             </p>
           ) : null}

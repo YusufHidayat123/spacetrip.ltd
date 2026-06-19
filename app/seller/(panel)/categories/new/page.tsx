@@ -21,7 +21,7 @@ export default function NewCategoryPage() {
     };
 
     const parsed = categorySchema.safeParse(values);
-    if (!parsed.success) throw new Error("Invalid category input");
+    if (!parsed.success) throw new Error("Input kategori tidak valid");
 
     await adminCreateCategory(parsed.data);
     redirect("/seller/categories");
@@ -30,20 +30,20 @@ export default function NewCategoryPage() {
   return (
     <PageShell>
       <PageHeader
-        title="New Category"
+        title="Kategori Baru"
         breadcrumb={
           <Breadcrumb
             items={[
-              { label: "seller", href: "/seller" },
-              { label: "category", href: "/seller/categories" },
-              { label: "new" },
+              { label: "admin", href: "/seller" },
+              { label: "kategori", href: "/seller/categories" },
+              { label: "baru" },
             ]}
           />
         }
       />
 
       <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-        <CategoryForm submitLabel="Create" action={createCategoryAction} />
+        <CategoryForm submitLabel="Buat" action={createCategoryAction} />
       </section>
     </PageShell>
   );

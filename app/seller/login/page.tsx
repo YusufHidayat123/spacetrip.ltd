@@ -18,15 +18,15 @@ export default async function SellerLoginPage({
 
   return (
     <PageShell>
-      <div className="mx-auto mt-20 w-full max-w-[520px] rounded-2xl border border-(--st-border) bg-white p-6 shadow-[0_16px_48px_rgba(17,24,39,0.12)]">
-        <div className="text-lg font-semibold tracking-tight text-(--st-text)">Admin Login</div>
+      <div className="mx-auto mt-20 w-full max-w-130 rounded-2xl border border-(--st-border) bg-white p-6 shadow-[0_16px_48px_rgba(17,24,39,0.12)]">
+        <div className="text-lg font-semibold tracking-tight text-(--st-text)">Login Admin</div>
         <div className="mt-1 text-sm text-(--st-text-muted)">
-          Masuk untuk mengakses seller panel.
+          Masuk untuk mengakses panel admin.
         </div>
 
         {reason === "forbidden" ? (
           <div className="mt-4 rounded-xl border border-[#FEE2E2] bg-[#FEF2F2] p-4 text-sm text-[#B91C1C]">
-            Akun kamu tidak punya akses seller.
+            Akun kamu tidak punya akses admin.
           </div>
         ) : null}
 

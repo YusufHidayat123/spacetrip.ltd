@@ -35,13 +35,13 @@ export function CategoryForm({
     <form className="grid gap-4" action={action}>
       <div className="grid gap-2">
         <label className="text-sm font-medium text-(--st-text)">
-          Name
+          Nama
         </label>
         <Input
           name="name"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          placeholder="T-Shirts"
+          placeholder="Kaos"
           required
         />
       </div>
@@ -61,7 +61,7 @@ export function CategoryForm({
           required
         />
         <p className="text-xs text-(--st-text-muted)">
-          Used for URLs. Letters, numbers, and hyphens only.
+          Dipakai untuk URL. Gunakan huruf, angka, dan tanda hubung saja.
         </p>
       </div>
 
@@ -81,12 +81,12 @@ export function CategoryForm({
           htmlFor="is_active"
           className="text-sm text-(--st-text)"
         >
-          Active
+          Aktif
         </label>
       </div>
 
       <div className="flex items-center justify-end gap-2">
-        <SubmitButton pendingText="Saving...">{submitLabel}</SubmitButton>
+        <SubmitButton pendingText="Menyimpan...">{submitLabel}</SubmitButton>
       </div>
     </form>
   );

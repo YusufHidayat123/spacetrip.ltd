@@ -61,17 +61,17 @@ export default async function ProductsPage({
   return (
     <PageShell>
       <PageHeader
-        title="Catalog"
+        title="Katalog"
         breadcrumb={
           <Breadcrumb
-            items={[{ label: "seller", href: "/seller" }, { label: "catalog" }]}
+            items={[{ label: "admin", href: "/seller" }, { label: "katalog" }]}
           />
         }
         right={
           <Button asChild>
             <Link href="/seller/products/new">
               <Plus className="h-4 w-4" />
-              New Product
+              Produk Baru
             </Link>
           </Button>
         }
@@ -79,12 +79,12 @@ export default async function ProductsPage({
 
       <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-4 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
         <form className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="relative w-full md:max-w-[420px]">
+          <div className="relative w-full md:max-w-105">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--st-text-muted)" />
             <Input
               name="q"
               defaultValue={q}
-              placeholder="Search products"
+              placeholder="Cari produk"
               className="h-10 pl-9"
             />
           </div>
@@ -95,13 +95,13 @@ export default async function ProductsPage({
               defaultValue={status}
               className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
             >
-              <option value="all">All</option>
-              <option value="active">Active</option>
+              <option value="all">Semua</option>
+              <option value="active">Aktif</option>
               <option value="draft">Draft</option>
             </select>
 
             <Button type="submit" className="h-10">
-              Apply
+              Terapkan
             </Button>
           </div>
         </form>
@@ -111,18 +111,18 @@ export default async function ProductsPage({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead className="w-[180px]">Category</TableHead>
-              <TableHead className="w-[160px]">Price</TableHead>
-              <TableHead className="w-[120px]">Status</TableHead>
-              <TableHead className="w-[120px]">Action</TableHead>
+              <TableHead>Produk</TableHead>
+              <TableHead className="w-45">Kategori</TableHead>
+              <TableHead className="w-40">Harga</TableHead>
+              <TableHead className="w-30">Status</TableHead>
+              <TableHead className="w-30">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-sm text-(--st-text-muted)">
-                  No products yet.
+                  Belum ada produk.
                 </TableCell>
               </TableRow>
             ) : (
@@ -141,14 +141,14 @@ export default async function ProductsPage({
                     {formatIDR(p.price)}
                   </TableCell>
                   <TableCell className="text-(--st-text-muted)">
-                    {p.status}
+                    {p.status === "active" ? "Aktif" : "Draft"}
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/seller/products/${p.id}`}
                       className="inline-flex items-center gap-1 text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                     >
-                      Manage
+                      Kelola
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </TableCell>

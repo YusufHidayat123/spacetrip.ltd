@@ -19,8 +19,8 @@ export default async function Home() {
 
       <main className="px-5 pb-6">
         <section className="mt-5 overflow-hidden rounded-[28px] bg-white shadow-[0_16px_40px_rgba(17,24,39,0.10)]">
-          <div className="relative aspect-[4/3] w-full bg-[#F7F8FA]">
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/0 via-black/0 to-black/5" />
+          <div className="relative aspect-4/3 w-full bg-[#F7F8FA]">
+            <div className="absolute inset-0 bg-linear-to-tr from-black/0 via-black/0 to-black/5" />
 
             <div className="absolute left-5 top-5 flex flex-wrap items-center gap-2">
               <div className="rounded-full border border-(--st-border) bg-white/90 px-3 py-1 text-[11px] font-medium text-(--st-text-muted)">
@@ -58,7 +58,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mt-5 grid gap-3 rounded-[24px] border border-(--st-border) bg-white p-4">
+        <section className="mt-5 grid gap-3 rounded-3xl border border-(--st-border) bg-white p-4">
           <div className="text-sm font-semibold text-(--st-text)">Fokus Spacetrip</div>
           <div className="grid gap-2 text-sm text-(--st-text-muted)">
             <div className="flex gap-2">
@@ -110,7 +110,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[24px] border border-(--st-border) bg-white p-4">
+        <section className="mt-6 rounded-3xl border border-(--st-border) bg-white p-4">
           <div className="text-sm font-semibold text-(--st-text)">Cara belanja</div>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-(--st-text-muted)">
             <li>Browse koleksi thrift terbaru.</li>

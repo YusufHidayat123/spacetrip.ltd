@@ -12,25 +12,25 @@ export default function NewProductError({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[720px] px-6 py-10">
+    <div className="mx-auto w-full max-w-180 px-6 py-10">
       <div className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
         <div className="text-sm font-semibold text-(--st-text)">
-          Could not create product
+          Produk gagal dibuat
         </div>
         <p className="mt-2 text-sm text-(--st-text-muted)">
           {error.message.includes("Body exceeded")
-            ? "Upload size is too large for the current limit. Please select smaller images and try again."
+            ? "Ukuran upload terlalu besar untuk batas saat ini. Pilih gambar yang lebih kecil lalu coba lagi."
             : error.message}
         </p>
         <div className="mt-5 flex items-center gap-2">
-          <Button onClick={reset}>Try again</Button>
+          <Button onClick={reset}>Coba lagi</Button>
           <Button
             variant="outline"
             onClick={() => {
               window.location.href = "/seller/products";
             }}
           >
-            Back to Catalog
+            Kembali ke Katalog
           </Button>
         </div>
       </div>

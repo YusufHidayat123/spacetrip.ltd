@@ -48,7 +48,7 @@ function StatCard({ label, value, hint, right }: StatCardProps) {
             </div>
           ) : null}
         </div>
-        {right ? <div className="w-[120px]">{right}</div> : null}
+        {right ? <div className="w-30">{right}</div> : null}
       </div>
     </div>
   );
@@ -90,10 +90,10 @@ export default async function SellerDashboardPage({
 
   const salesModeLabel =
     salesMode === "verified"
-      ? "Verified payments"
+      ? "Pembayaran terverifikasi"
       : salesMode === "completed"
-        ? "Completed orders"
-        : "All orders";
+        ? "Pesanan selesai"
+        : "Semua pesanan";
 
   function buildHref(next: { view?: string; salesMode?: string }) {
     const params = new URLSearchParams();
@@ -106,16 +106,16 @@ export default async function SellerDashboardPage({
     <PageShell>
       <PageHeader
         title="Dashboard"
-        badge={<Badge>Overview</Badge>}
+        badge={<Badge>Ringkasan</Badge>}
         breadcrumb={
           <Breadcrumb
-            items={[{ label: "seller", href: "/seller" }, { label: "dashboard" }]}
+            items={[{ label: "admin", href: "/seller" }, { label: "dashboard" }]}
           />
         }
         right={
           <Button asChild variant="outline">
             <Link href="/seller/orders">
-              View Orders
+              Lihat Pesanan
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -124,25 +124,25 @@ export default async function SellerDashboardPage({
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Orders (total)"
+          label="Total pesanan"
           value={String(data.counts.totalOrders)}
-          hint={`${data.counts.newOrders} new`}
+          hint={`${data.counts.newOrders} baru`}
         />
         <StatCard
-          label="Payment to review"
+          label="Pembayaran perlu review"
           value={String(data.counts.needReview)}
-          hint="Submitted proofs"
+          hint="Bukti bayar masuk"
         />
         <StatCard
-          label={view === "day" ? "Sales (30d)" : "Sales (12m)"}
+          label={view === "day" ? "Penjualan (30 hari)" : "Penjualan (12 bulan)"}
           value={String(salesSum)}
           hint={salesModeLabel}
           right={<MiniLineChart values={salesSeries} />}
         />
         <StatCard
-          label="Active products"
+          label="Produk aktif"
           value={String(data.counts.activeProducts)}
-          hint={`${data.topProductsByStock.length} shown`}
+          hint={`${data.topProductsByStock.length} ditampilkan`}
         />
       </div>
 
@@ -151,10 +151,10 @@ export default async function SellerDashboardPage({
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="text-sm font-semibold text-(--st-text)">
-                Sales chart
+                Chart penjualan
               </div>
               <div className="mt-1 text-xs text-(--st-text-muted)">
-                View: <span className="font-medium text-(--st-text)">{view === "day" ? "Daily (30d)" : "Monthly (12m)"}</span> · Mode: <span className="font-medium text-(--st-text)">{salesModeLabel}</span>
+                Tampilan: <span className="font-medium text-(--st-text)">{view === "day" ? "Harian (30 hari)" : "Bulanan (12 bulan)"}</span> · Mode: <span className="font-medium text-(--st-text)">{salesModeLabel}</span>
               </div>
             </div>
 
@@ -169,7 +169,7 @@ export default async function SellerDashboardPage({
                       : "bg-white text-(--st-text-muted) hover:bg-[#F7F8FA]")
                   }
                 >
-                  Monthly
+                  Bulanan
                 </Link>
                 <Link
                   href={buildHref({ view: "day" })}
@@ -180,7 +180,7 @@ export default async function SellerDashboardPage({
                       : "bg-white text-(--st-text-muted) hover:bg-[#F7F8FA]")
                   }
                 >
-                  Daily
+                  Harian
                 </Link>
               </div>
 
@@ -194,7 +194,7 @@ export default async function SellerDashboardPage({
                       : "bg-white text-(--st-text-muted) hover:bg-[#F7F8FA]")
                   }
                 >
-                  Verified
+                  Terverifikasi
                 </Link>
                 <Link
                   href={buildHref({ salesMode: "completed" })}
@@ -205,7 +205,7 @@ export default async function SellerDashboardPage({
                       : "bg-white text-(--st-text-muted) hover:bg-[#F7F8FA]")
                   }
                 >
-                  Completed
+                  Selesai
                 </Link>
                 <Link
                   href={buildHref({ salesMode: "all" })}
@@ -216,7 +216,7 @@ export default async function SellerDashboardPage({
                       : "bg-white text-(--st-text-muted) hover:bg-[#F7F8FA]")
                   }
                 >
-                  All
+                  Semua
                 </Link>
               </div>
             </div>
@@ -225,7 +225,7 @@ export default async function SellerDashboardPage({
           <div className="mt-5 rounded-lg border border-(--st-border) bg-[#F7F8FA] p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="text-xs font-medium text-(--st-text-muted)">
-                {view === "day" ? "Sales per day" : "Sales per month"}
+                {view === "day" ? "Penjualan per hari" : "Penjualan per bulan"}
               </div>
               <div className="text-xs text-(--st-text-muted)">
                 Total: <span className="font-medium text-(--st-text)">{salesSum}</span>
@@ -244,7 +244,7 @@ export default async function SellerDashboardPage({
 
                   return (
                     <div key={fullKey} className={`shrink-0 ${colClass}`}
-                      title={`${fullKey}: ${m.sales} sales`}
+                      title={`${fullKey}: ${m.sales} penjualan`}
                     >
                       <div
                         className="w-full rounded-sm bg-(--st-text)/80"
@@ -265,20 +265,20 @@ export default async function SellerDashboardPage({
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-sm font-semibold text-(--st-text)">
-                Catalog (top stock)
+                Katalog (stok tertinggi)
               </div>
               <div className="mt-1 text-xs text-(--st-text-muted)">
-                Top 5 products by total stock (active variants)
+                Top 5 produk berdasarkan total stok (varian aktif)
               </div>
             </div>
             <Button asChild variant="outline" size="sm" className="h-9">
-              <Link href="/seller/products">Catalog</Link>
+              <Link href="/seller/products">Katalog</Link>
             </Button>
           </div>
 
           <div className="mt-4 grid gap-2">
             {data.topProductsByStock.length === 0 ? (
-              <div className="text-sm text-(--st-text-muted)">No products found.</div>
+              <div className="text-sm text-(--st-text-muted)">Produk tidak ditemukan.</div>
             ) : (
               data.topProductsByStock.map((p) => {
                 const imgUrl = p.image ? getPublicProductImageUrl(p.image.storage_path) : null;
@@ -305,12 +305,12 @@ export default async function SellerDashboardPage({
                         {p.name}
                       </div>
                       <div className="mt-0.5 text-xs text-(--st-text-muted)">
-                        Stock: {p.totalStock}
+                        Stok: {p.totalStock}
                       </div>
                     </div>
 
                     <div className="text-xs font-medium text-(--st-text)">
-                      View
+                      Lihat
                     </div>
                   </Link>
                 );
@@ -324,32 +324,32 @@ export default async function SellerDashboardPage({
         <div className="flex items-center justify-between gap-4 border-b border-(--st-border) px-6 py-4">
           <div>
             <div className="text-sm font-semibold text-(--st-text)">
-              Recent orders
+              Pesanan terbaru
             </div>
             <div className="mt-1 text-xs text-(--st-text-muted)">
-              Last 6 orders created
+              6 pesanan terakhir yang dibuat
             </div>
           </div>
           <Button asChild variant="outline" size="sm" className="h-9">
-            <Link href="/seller/orders">View all</Link>
+            <Link href="/seller/orders">Lihat semua</Link>
           </Button>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead className="w-[160px]">Total</TableHead>
-              <TableHead className="w-[180px]">Created</TableHead>
-              <TableHead className="w-[120px]">Action</TableHead>
+              <TableHead>Pesanan</TableHead>
+              <TableHead>Pelanggan</TableHead>
+              <TableHead className="w-40">Total</TableHead>
+              <TableHead className="w-45">Dibuat</TableHead>
+              <TableHead className="w-30">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.recentOrders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-sm text-(--st-text-muted)">
-                  No orders yet.
+                  Belum ada pesanan.
                 </TableCell>
               </TableRow>
             ) : (
@@ -374,7 +374,7 @@ export default async function SellerDashboardPage({
                       href={`/seller/orders/${o.id}`}
                       className="text-sm font-medium text-(--st-text) underline-offset-4 hover:underline"
                     >
-                      Manage
+                      Kelola
                     </Link>
                   </TableCell>
                 </TableRow>
