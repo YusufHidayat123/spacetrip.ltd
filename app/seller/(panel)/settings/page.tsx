@@ -13,12 +13,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { adminGetStoreSettings, adminUpsertStoreSettings } from "@/lib/settings/admin";
 import { QrisUploadField } from "./_components/qris-upload-field";
 
-function getPublicObjectUrl(bucket: string, storagePath: string) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) throw new Error("NEXT_PUBLIC_SUPABASE_URL belum diatur");
-  return `${url}/storage/v1/object/public/${bucket}/${storagePath}`;
-}
-
 export default async function SettingsPage() {
   const settings = await adminGetStoreSettings();
 
@@ -28,6 +22,9 @@ export default async function SettingsPage() {
     const store_name = String(formData.get("store_name") ?? "").trim() || "Spacetrip";
     const payment_instructions_raw = String(formData.get("payment_instructions") ?? "").trim();
     const payment_instructions = payment_instructions_raw.length ? payment_instructions_raw : null;
+
+    const currentSettingsIdRaw = String(formData.get("settings_id") ?? "").trim();
+    const settingsId = currentSettingsIdRaw.length ? currentSettingsIdRaw : null;
 
     const currentUrlRaw = String(formData.get("qris_current_url") ?? "").trim();
     const currentUrl = currentUrlRaw.length ? currentUrlRaw : null;
@@ -51,20 +48,23 @@ export default async function SettingsPage() {
       const storagePath = `qris/${fileName}`;
 
       const supabase = createSupabaseAdminClient();
-      const arrayBuffer = await file.arrayBuffer();
+      const fileBytes = new Uint8Array(await file.arrayBuffer());
 
-      const { error: uploadError } = await supabase.storage.from(bucket).upload(storagePath, arrayBuffer, {
+      const { error: uploadError } = await supabase.storage.from(bucket).upload(storagePath, fileBytes, {
         contentType: file.type || `image/${safeExt}`,
         upsert: false,
         cacheControl: "3600",
       });
       if (uploadError) throw uploadError;
 
-      // Expect bucket to be public.
-      qris_image_url = getPublicObjectUrl(bucket, storagePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(storagePath);
+      qris_image_url = publicUrl;
     }
 
     await adminUpsertStoreSettings({
+      id: settingsId && settingsId !== "default" ? settingsId : null,
       store_name,
       payment_instructions,
       qris_image_url,
@@ -95,6 +95,7 @@ export default async function SettingsPage() {
           </div>
 
           <form action={saveAction} encType="multipart/form-data" className="mt-5 grid gap-5">
+            <input type="hidden" name="settings_id" value={settings.id ?? ""} />
             <input type="hidden" name="qris_current_url" value={settings.qris_image_url ?? ""} />
 
             <div className="grid gap-2">

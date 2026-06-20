@@ -34,19 +34,27 @@ export async function adminGetStoreSettings() {
 }
 
 export async function adminUpsertStoreSettings(input: {
+  id?: string | null;
   store_name: string;
   payment_instructions: string | null;
   qris_image_url: string | null;
 }) {
   const supabase = createSupabaseAdminClient();
 
-  const { data, error } = await supabase
-    .from("store_settings")
-    .insert({
-      store_name: input.store_name,
-      payment_instructions: input.payment_instructions,
-      qris_image_url: input.qris_image_url,
-    })
+  const payload = {
+    store_name: input.store_name,
+    payment_instructions: input.payment_instructions,
+    qris_image_url: input.qris_image_url,
+  };
+
+  const query = input.id
+    ? supabase
+        .from("store_settings")
+        .update(payload)
+        .eq("id", input.id)
+    : supabase.from("store_settings").insert(payload);
+
+  const { data, error } = await query
     .select("id,store_name,payment_instructions,qris_image_url,updated_at")
     .single();
 
