@@ -204,10 +204,6 @@ export default async function OrdersPage({
             return `/seller/orders?${params.toString()}`;
           }}
         />
-
-        <p className="mt-3 text-xs text-(--st-text-muted)">
-          Tips: filter pembayaran = <span className="font-medium text-(--st-text)">submitted</span> untuk review bukti bayar baru.
-        </p>
       </section>
     </PageShell>
   );

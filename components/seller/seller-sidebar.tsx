@@ -45,16 +45,16 @@ function getNavItems(counts: SidebarCounts): NavItem[] {
       // Show new orders as a badge (most actionable)
       badge: counts.newOrders > 0 ? String(counts.newOrders) : undefined,
     },
-    {
-      label: "Transaksi",
-      href: "/seller/transactions",
-      icon: BadgeDollarSign,
-      // Since payments are manual, this is the closest signal we have.
-      badge:
-        counts.paymentToReview > 0
-          ? String(counts.paymentToReview)
-          : undefined,
-    },
+    // {
+    //   label: "Transaksi",
+    //   href: "/seller/transactions",
+    //   icon: BadgeDollarSign,
+    //   // Since payments are manual, this is the closest signal we have.
+    //   badge:
+    //     counts.paymentToReview > 0
+    //       ? String(counts.paymentToReview)
+    //       : undefined,
+    // },
     { label: "Katalog", href: "/seller/products", icon: ShoppingBag },
     { label: "Kategori", href: "/seller/categories", icon: Shapes },
     { label: "Pengaturan", href: "/seller/settings", icon: Settings },
@@ -97,10 +97,10 @@ export function SellerSidebar({
             </div>
             <div className="leading-tight">
               <div className="text-sm font-semibold tracking-tight text-(--st-text)">
-                spacetrip
+                Spacetrip
               </div>
               <div className="text-xs text-(--st-text-muted)">
-                Konsol Admin
+                Administrator
               </div>
             </div>
           </Link>

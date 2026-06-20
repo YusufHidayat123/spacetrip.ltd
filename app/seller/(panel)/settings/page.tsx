@@ -132,10 +132,6 @@ export default async function SettingsPage() {
               </Button>
               <SubmitButton pendingText="Menyimpan...">Simpan</SubmitButton>
             </div>
-
-            <div className="text-[11px] text-(--st-text-muted)">
-              Catatan: bucket default yang dipakai adalah `store-assets` (public). Bisa diganti via env `SUPABASE_STORE_ASSETS_BUCKET`.
-            </div>
           </form>
         </section>
       </div>
