@@ -46,7 +46,7 @@ export function SellerAuthButtons({ next }: { next: string }) {
       {error ? <div className="text-xs text-[#B91C1C]">{error}</div> : null}
 
       <div className="text-[11px] text-(--st-text-muted)">
-        Akses panel admin hanya untuk akun dengan role <span className="font-medium">seller/admin</span>.
+        Akses panel admin hanya untuk akun <span className="font-medium">Karyawan</span> atau <span className="font-medium">Super Admin</span>.
       </div>
     </div>
   );

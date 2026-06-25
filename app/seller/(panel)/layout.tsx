@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 
-import { redirect } from "next/navigation";
-
 import { SellerSidebar } from "@/components/seller/seller-sidebar";
 import { adminGetSidebarCounts } from "@/lib/dashboard/sidebar";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireSellerPanelRole } from "@/lib/auth/roles";
 
 // Sidebar badges should always reflect real DB state (new orders, payments to review).
 export const dynamic = "force-dynamic";
@@ -20,31 +18,12 @@ export default async function SellerPanelLayout({
 }) {
   // Defense-in-depth: middleware should already protect `/seller/*`,
   // but keep a server-side guard so service-role queries aren't reachable publicly.
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect(`/seller/login?next=${encodeURIComponent("/seller")}`);
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const role = String(profile?.role ?? "customer");
-  if (role !== "seller" && role !== "admin") {
-    redirect("/seller/login?reason=forbidden");
-  }
-
+  const { role } = await requireSellerPanelRole();
   const counts = await adminGetSidebarCounts();
 
   return (
     <div className="min-h-screen bg-(--st-bg)">
-      <SellerSidebar counts={counts} />
+      <SellerSidebar counts={counts} role={role} />
       <div className="pl-68">
         <main className="min-h-screen">{children}</main>
       </div>

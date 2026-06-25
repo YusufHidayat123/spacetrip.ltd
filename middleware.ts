@@ -22,6 +22,8 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isSellerRoute = pathname.startsWith("/seller");
   const isSellerLogin = pathname === "/seller/login";
+  const isSuperAdminRoute =
+    pathname.startsWith("/seller/settings") || pathname.startsWith("/seller/staff");
   const isOrdersRoute = pathname.startsWith("/orders");
   const isProfileSetupRoute = pathname.startsWith("/profile/setup");
 
@@ -111,6 +113,14 @@ export async function middleware(request: NextRequest) {
       loginUrl.pathname = "/seller/login";
       loginUrl.searchParams.set("reason", "forbidden");
       return redirectWithCookies(loginUrl);
+    }
+
+    if (isSuperAdminRoute && role !== "admin") {
+      const dashUrl = request.nextUrl.clone();
+      dashUrl.pathname = "/seller";
+      dashUrl.search = "";
+      dashUrl.searchParams.set("reason", "super-admin-required");
+      return redirectWithCookies(dashUrl);
     }
   }
 

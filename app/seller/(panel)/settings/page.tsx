@@ -10,14 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { requireSuperAdmin } from "@/lib/auth/roles";
 import { adminGetStoreSettings, adminUpsertStoreSettings } from "@/lib/settings/admin";
 import { QrisUploadField } from "./_components/qris-upload-field";
 
 export default async function SettingsPage() {
+  await requireSuperAdmin();
+
   const settings = await adminGetStoreSettings();
 
   async function saveAction(formData: FormData) {
     "use server";
+
+    await requireSuperAdmin();
 
     const store_name = String(formData.get("store_name") ?? "").trim() || "Spacetrip";
     const payment_instructions_raw = String(formData.get("payment_instructions") ?? "").trim();

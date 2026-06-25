@@ -5,7 +5,6 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BadgeDollarSign,
   ClipboardList,
   LayoutGrid,
   LogOut,
@@ -15,12 +14,15 @@ import {
   ShoppingBag,
   ChevronDown,
   Rocket,
+  UsersRound,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+type AppRole = "customer" | "seller" | "admin";
 
 type NavItem = {
   label: string;
@@ -35,8 +37,8 @@ type SidebarCounts = {
   paymentToReview: number;
 };
 
-function getNavItems(counts: SidebarCounts): NavItem[] {
-  return [
+function getNavItems(counts: SidebarCounts, role: AppRole): NavItem[] {
+  const items: NavItem[] = [
     { label: "Dashboard", href: "/seller", icon: LayoutGrid },
     {
       label: "Pesanan",
@@ -57,14 +59,24 @@ function getNavItems(counts: SidebarCounts): NavItem[] {
     // },
     { label: "Katalog", href: "/seller/products", icon: ShoppingBag },
     { label: "Kategori", href: "/seller/categories", icon: Shapes },
-    { label: "Pengaturan", href: "/seller/settings", icon: Settings },
   ];
+
+  if (role === "admin") {
+    items.push(
+      { label: "Pengaturan", href: "/seller/settings", icon: Settings },
+      { label: "Staff", href: "/seller/staff", icon: UsersRound }
+    );
+  }
+
+  return items;
 }
 
 export function SellerSidebar({
   counts,
+  role,
 }: {
   counts: SidebarCounts;
+  role: AppRole;
 }) {
   const pathname = usePathname();
   const [email, setEmail] = React.useState<string>("admin");
@@ -100,7 +112,7 @@ export function SellerSidebar({
                 Spacetrip
               </div>
               <div className="text-xs text-(--st-text-muted)">
-                Administrator
+                {role === "admin" ? "Super Admin" : "Karyawan"}
               </div>
             </div>
           </Link>
@@ -119,7 +131,7 @@ export function SellerSidebar({
 
         <nav className="mt-4 flex-1 px-2">
           <div className="space-y-1">
-            {getNavItems(counts).map((item) => {
+            {getNavItems(counts, role).map((item) => {
               const active =
                 item.href === "/seller"
                   ? pathname === item.href
@@ -183,7 +195,7 @@ export function SellerSidebar({
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-(--st-text)">
-                Admin
+                {role === "admin" ? "Super Admin" : "Karyawan"}
               </div>
               <div className="truncate text-xs text-(--st-text-muted)">
                 {email}
