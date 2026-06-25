@@ -64,7 +64,7 @@ function getNavItems(counts: SidebarCounts, role: AppRole): NavItem[] {
   if (role === "admin") {
     items.push(
       { label: "Pengaturan", href: "/seller/settings", icon: Settings },
-      { label: "Staff", href: "/seller/staff", icon: UsersRound }
+      { label: "Kelola User", href: "/seller/staff", icon: UsersRound }
     );
   }
 
