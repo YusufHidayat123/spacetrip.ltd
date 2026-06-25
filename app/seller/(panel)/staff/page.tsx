@@ -3,12 +3,10 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 
-import { SubmitButton } from "@/components/form/submit-button";
 import { Breadcrumb } from "@/components/seller/breadcrumb";
 import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -25,6 +23,7 @@ import {
 } from "@/lib/team/admin";
 import { formatDateTime } from "@/lib/orders/format";
 import { AddUserModal } from "./_components/add-user-modal";
+import { StaffActionsMenu } from "./_components/staff-actions-menu";
 
 function RoleBadge({ role }: { role: StaffRole }) {
   return role === "admin" ? (
@@ -163,34 +162,18 @@ export default async function StaffPage({
                   team.map((member) => (
                     <TableRow key={member.id}>
                       <TableCell>
-                        <form id={`staff-${member.id}`} action={updateStaffAction} className="grid gap-2">
-                          <input type="hidden" name="user_id" value={member.id} />
-                          <Input name="full_name" defaultValue={member.full_name ?? ""} placeholder="Nama" className="h-9" />
-                          <div className="text-xs text-(--st-text-muted)">{member.email ?? "—"}</div>
-                        </form>
-                      </TableCell>
-                      <TableCell>
-                        <div className="grid gap-2">
-                          <RoleBadge role={member.role} />
-                          <select
-                            form={`staff-${member.id}`}
-                            name="role"
-                            defaultValue={member.role}
-                            className="h-9 rounded-md border border-(--st-border) bg-white px-2 text-xs text-(--st-text)"
-                          >
-                            <option value="seller">Karyawan</option>
-                            <option value="admin">Super Admin</option>
-                          </select>
+                        <div className="font-medium text-(--st-text)">
+                          {member.full_name || "—"}
+                        </div>
+                        <div className="mt-1 text-xs text-(--st-text-muted)">
+                          {member.email ?? "—"}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Input
-                          form={`staff-${member.id}`}
-                          name="phone"
-                          defaultValue={member.phone ?? ""}
-                          placeholder="No. HP"
-                          className="h-9"
-                        />
+                        <RoleBadge role={member.role} />
+                      </TableCell>
+                      <TableCell className="text-sm text-(--st-text-muted)">
+                        {member.phone || "—"}
                       </TableCell>
                       <TableCell className="text-xs text-(--st-text-muted)">
                         <div>Dibuat: {formatDateTime(member.created_at)}</div>
@@ -199,9 +182,7 @@ export default async function StaffPage({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <SubmitButton form={`staff-${member.id}`} size="sm" variant="outline" pendingText="...">
-                          Simpan
-                        </SubmitButton>
+                        <StaffActionsMenu member={member} action={updateStaffAction} />
                       </TableCell>
                     </TableRow>
                   ))
