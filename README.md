@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# spacetrip.
 
-## Getting Started
+Platform e-commerce kurasi thrift & streetwear lokal Indonesia berbasis **Next.js** dan **Supabase**, dilengkapi storefront editorial *Momento*, pembayaran QRIS manual, dan panel operasional seller/admin.
 
-First, run the development server:
+<p>
+  <img src="https://img.shields.io/badge/Next.js-16.2%20%7C%20React%2019-5C6BC0?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 16.2 | React 19" />
+  <img src="https://img.shields.io/badge/Architecture-App%20Router%20%7C%20Server%20Actions-0284C7?style=flat-square" alt="Architecture: App Router | Server Actions" />
+  <img src="https://img.shields.io/badge/Database-Supabase%20PostgreSQL%20%7C%20Storage-00758F?style=flat-square&logo=postgresql&logoColor=white" alt="Database: Supabase PostgreSQL | Storage" />
+  <img src="https://img.shields.io/badge/UI%20Design-Momento%20Editorial-FF5500?style=flat-square" alt="UI Design: Momento Editorial" />
+  <br />
+  <img src="https://img.shields.io/badge/Frontend-Tailwind%20CSS%204%20%2B%20Framer%20Motion-7C3AED?style=flat-square&logo=tailwindcss&logoColor=white" alt="Frontend: Tailwind CSS 4 + Framer Motion" />
+  <img src="https://img.shields.io/badge/Commerce-QRIS%20%7C%20Atomic%20Stock%20RPC-EC4899?style=flat-square&logo=supabase&logoColor=white" alt="Commerce: QRIS | Atomic Stock RPC" />
+  <img src="https://img.shields.io/badge/Security-Supabase%20Auth%20%7C%20RLS%20%7C%20RBAC-16A34A?style=flat-square" alt="Security: Supabase Auth | RLS | RBAC" />
+  <br />
+  <img src="https://img.shields.io/badge/Runtime-Node.js%20%7C%20TypeScript%205%20%7C%20Turbopack-1D4ED8?style=flat-square&logo=nodedotjs&logoColor=white" alt="Runtime: Node.js | TypeScript 5 | Turbopack" />
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Fitur Utama
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Storefront Responsif**: Katalog multi-filter (`/products`), pencarian instan (`/api/search`), quick view, wishlist, dan slide-out cart drawer.
+- **Checkout & QRIS**: Pemesanan dengan kunci stok atomik via PostgreSQL RPC dan unggah bukti transfer QRIS manual.
+- **Portal Seller & Admin (`/seller`)**: Dashboard ringkasan, manajemen produk/varian/kategori, verifikasi QRIS (`/seller/transactions`), pengaturan QRIS toko, serta manajemen staff dengan RBAC (`customer`, `seller`, `admin`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Menjalankan Secara Lokal
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Install dependencies**
 
-## Learn More
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Konfigurasi `.env.local`**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   SUPABASE_SERVICE_ROLE_KEY=
+   SUPABASE_PRODUCT_IMAGES_BUCKET=product-images
+   SUPABASE_PAYMENT_PROOFS_BUCKET=payment-proofs
+   SUPABASE_STORE_ASSETS_BUCKET=store-assets
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Jalankan Supabase lokal & aplikasi**
 
-## Deploy on Vercel
+   ```bash
+   supabase start
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Buka [http://localhost:3000](http://localhost:3000) untuk storefront dan [http://localhost:3000/seller/login](http://localhost:3000/seller/login) untuk portal admin/seller.

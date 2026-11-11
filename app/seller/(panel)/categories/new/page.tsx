@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
 import { adminCreateCategory } from "@/lib/catalog/admin";
 import { categorySchema } from "@/lib/catalog/validation";
-
 import { CategoryForm } from "../_components/category-form";
 
 export default function NewCategoryPage() {
@@ -42,8 +41,8 @@ export default function NewCategoryPage() {
         }
       />
 
-      <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-        <CategoryForm submitLabel="Buat" action={createCategoryAction} />
+      <section className="mt-6 max-w-2xl rounded-3xl border border-(--st-border) bg-white p-6 sm:p-8">
+        <CategoryForm submitLabel="Buat Kategori" action={createCategoryAction} />
       </section>
     </PageShell>
   );

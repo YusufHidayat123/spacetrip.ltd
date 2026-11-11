@@ -5,7 +5,6 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/form/submit-button";
 import { slugify } from "@/lib/catalog/slug";
-import { cn } from "@/lib/utils";
 
 export function CategoryForm({
   defaultValues,
@@ -18,9 +17,7 @@ export function CategoryForm({
 }) {
   const [name, setName] = React.useState(defaultValues?.name ?? "");
   const [slug, setSlug] = React.useState(defaultValues?.slug ?? "");
-  const [isActive, setIsActive] = React.useState(
-    defaultValues?.is_active ?? true
-  );
+  const [isActive, setIsActive] = React.useState(defaultValues?.is_active ?? true);
   const [slugTouched, setSlugTouched] = React.useState(false);
 
   function onNameChange(next: string) {
@@ -28,27 +25,25 @@ export function CategoryForm({
     if (!slugTouched) setSlug(slugify(next));
   }
 
-  // If the user never touches the checkbox, browsers only submit it when checked.
-  // We rely on that behavior; server action treats missing = false.
-
   return (
-    <form className="grid gap-4" action={action}>
-      <div className="grid gap-2">
-        <label className="text-sm font-medium text-(--st-text)">
-          Nama
+    <form className="grid gap-5" action={action}>
+      <div className="grid gap-1.5">
+        <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+          Nama Kategori
         </label>
         <Input
           name="name"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          placeholder="Kaos"
+          placeholder="Outerwear & Jaket"
           required
+          className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
         />
       </div>
 
-      <div className="grid gap-2">
-        <label className="text-sm font-medium text-(--st-text)">
-          Slug
+      <div className="grid gap-1.5">
+        <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+          Slug URL
         </label>
         <Input
           name="slug"
@@ -57,36 +52,34 @@ export function CategoryForm({
             setSlugTouched(true);
             setSlug(slugify(e.target.value));
           }}
-          placeholder="t-shirts"
+          placeholder="jaket-outerwear"
           required
+          className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
         />
         <p className="text-xs text-(--st-text-muted)">
-          Dipakai untuk URL. Gunakan huruf, angka, dan tanda hubung saja.
+          Gunakan huruf kecil, angka, dan tanda hubung.
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <label className="flex items-center gap-2.5 text-xs font-medium text-(--st-text)">
         <input
           id="is_active"
           name="is_active"
           type="checkbox"
-          className={cn(
-            "h-4 w-4 rounded border border-(--st-border)",
-            "accent-(--st-primary)"
-          )}
+          className="h-4 w-4 accent-[#FF5500]"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
         />
-        <label
-          htmlFor="is_active"
-          className="text-sm text-(--st-text)"
-        >
-          Aktif
-        </label>
-      </div>
+        Aktifkan kategori di Storefront
+      </label>
 
-      <div className="flex items-center justify-end gap-2">
-        <SubmitButton pendingText="Menyimpan...">{submitLabel}</SubmitButton>
+      <div className="flex items-center justify-end border-t border-(--st-border) pt-4">
+        <SubmitButton
+          pendingText="Menyimpan..."
+          className="h-11 rounded-full bg-[#0D0D0D] px-6 font-mono-label text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#FF5500]"
+        >
+          {submitLabel}
+        </SubmitButton>
       </div>
     </form>
   );

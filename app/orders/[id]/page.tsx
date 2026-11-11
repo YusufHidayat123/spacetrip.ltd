@@ -1,35 +1,40 @@
 export const dynamic = "force-dynamic";
 
 import { notFound, redirect } from "next/navigation";
+import { CheckCircle2, Clock, QrCode, Receipt } from "lucide-react";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getStoreSettingsForCheckout } from "@/lib/settings/public";
 import { MobileShell } from "@/components/storefront/mobile-shell";
 import { StoreHeader } from "@/components/storefront/store-header";
 import { Badge } from "@/components/ui/badge";
-import { PaymentProofForm } from "./_components/payment-proof-form";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getStoreSettingsForCheckout } from "@/lib/settings/public";
 import { formatDateTime, formatIDR } from "@/lib/orders/format";
+import { PaymentProofForm } from "./_components/payment-proof-form";
 
 function isSupabaseNoRowsError(e: unknown): e is { code: string } {
-  return typeof e === "object" && e !== null && "code" in e && (e as { code?: unknown }).code === "PGRST116";
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "code" in e &&
+    (e as { code?: unknown }).code === "PGRST116"
+  );
 }
 
 function PaymentBadge({ status }: { status: string }) {
-  if (status === "verified") return <Badge variant="green">Terverifikasi</Badge>;
-  if (status === "submitted") return <Badge variant="amber">Menunggu cek</Badge>;
-  if (status === "rejected") return <Badge variant="red">Ditolak</Badge>;
-  if (status === "expired") return <Badge variant="red">Kedaluwarsa</Badge>;
-  return <Badge variant="neutral">Belum bayar</Badge>;
+  if (status === "verified") return <Badge variant="green">TERVERIFIKASI</Badge>;
+  if (status === "submitted") return <Badge variant="amber">MENUNGGU CEK</Badge>;
+  if (status === "rejected") return <Badge variant="red">DITOLAK</Badge>;
+  if (status === "expired") return <Badge variant="red">KEDALUWARSA</Badge>;
+  return <Badge variant="neutral">BELUM BAYAR</Badge>;
 }
 
 function OrderBadge({ status }: { status: string }) {
-  if (status === "processing") return <Badge>Diproses</Badge>;
-  if (status === "shipped") return <Badge variant="purple">Dikirim</Badge>;
-  if (status === "completed") return <Badge variant="green">Selesai</Badge>;
-  if (status === "cancelled") return <Badge variant="red">Dibatalkan</Badge>;
-  return <Badge>Baru</Badge>;
+  if (status === "processing") return <Badge variant="dark">DIPROSES</Badge>;
+  if (status === "shipped") return <Badge variant="purple">DIKIRIM</Badge>;
+  if (status === "completed") return <Badge variant="green">SELESAI</Badge>;
+  if (status === "cancelled") return <Badge variant="red">DIBATALKAN</Badge>;
+  return <Badge>BARU</Badge>;
 }
 
 export default async function OrderDetailMvpPage({
@@ -44,7 +49,6 @@ export default async function OrderDetailMvpPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Orders are login-only.
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(`/orders/${id}`)}`);
   }
@@ -87,7 +91,6 @@ export default async function OrderDetailMvpPage({
       redirect(`/login?next=${encodeURIComponent(`/orders/${id}`)}`);
     }
 
-    // Ensure order belongs to user (avoid orphan uploads).
     const { error: ownErr } = await supabase
       .from("orders")
       .select("id")
@@ -99,13 +102,11 @@ export default async function OrderDetailMvpPage({
     const file = formData.get("proof") as File | null;
     if (!file || file.size === 0) throw new Error("Pilih gambar bukti bayar dulu.");
 
-    // Basic server-side guard
     const maxBytes = 18 * 1024 * 1024;
     if (file.size > maxBytes) {
       throw new Error("File terlalu besar. Upload gambar yang lebih kecil.");
     }
 
-    // Upload to Storage using service role (bucket is recommended private).
     const admin = createSupabaseAdminClient();
     const bucket = process.env.SUPABASE_PAYMENT_PROOFS_BUCKET || "payment-proofs";
 
@@ -126,7 +127,6 @@ export default async function OrderDetailMvpPage({
 
     if (uploadError) throw uploadError;
 
-    // Insert proof + mark payment submitted using auth-aware RPC.
     const { error: rpcError } = await supabase.rpc("submit_payment_proof_auth", {
       _order_id: id,
       _storage_path: storagePath,
@@ -142,125 +142,184 @@ export default async function OrderDetailMvpPage({
 
   return (
     <MobileShell>
-      <StoreHeader title="Pembayaran" backHref="/orders" />
+      <StoreHeader title="Invoice" backHref="/orders" />
 
-      <main className="px-5 pb-6">
-        <section className="mt-4 rounded-3xl border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-xs font-medium text-(--st-text-muted)">Order</div>
-              <div className="mt-1 text-base font-semibold tracking-tight text-(--st-text)">
-                {order.order_number}
-              </div>
-              <div className="mt-1 text-xs text-(--st-text-muted)">
-                Dibuat: {formatDateTime(order.created_at)}
-              </div>
-              {order.pay_by ? (
-                <div className="mt-1 text-xs text-(--st-text-muted)">Batas bayar: {formatDateTime(order.pay_by)}</div>
-              ) : null}
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 lg:py-12">
+        {/* Header Bar */}
+        <div className="flex flex-col justify-between gap-4 border-b border-(--st-border) pb-6 md:flex-row md:items-end">
+          <div>
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#FF5500] text-[10px] font-bold text-white"
+              >
+                &#10035;
+              </span>
+              <span className="font-mono-label text-[11px] font-medium uppercase tracking-[0.14em] text-(--st-text-muted)">
+                [Order Invoice]
+              </span>
             </div>
-
-            <div className="text-right">
-              <div className="text-xs font-medium text-(--st-text-muted)">Total</div>
-              <div className="mt-1 text-base font-semibold tracking-tight text-(--st-text)">
-                {formatIDR(order.total_amount)}
-              </div>
+            <h1 className="mt-3 font-display text-3xl font-medium tracking-tight text-[#0D0D0D] sm:text-4xl">
+              {order.order_number}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-(--st-text-muted)">
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-[#FF5500]" />
+                Dibuat: {formatDateTime(order.created_at)}
+              </span>
+              {order.pay_by ? <span>· Batas bayar: {formatDateTime(order.pay_by)}</span> : null}
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <PaymentBadge status={order.payment_status} />
             <OrderBadge status={order.status} />
           </div>
+        </div>
 
-          <div className="mt-5">
-            <div className="text-sm font-semibold text-(--st-text)">Ringkasan item</div>
-            <div className="mt-3 grid gap-2">
-              {(items ?? []).map((it: {
-                id: string;
-                product_name: string;
-                variant_label: string;
-                quantity: number;
-              }) => (
-                <div
-                  key={it.id}
-                  className="flex items-start justify-between gap-3 rounded-2xl border border-(--st-border) bg-[#F7F8FA] px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-(--st-text)">{it.product_name}</div>
-                    <div className="mt-0.5 text-xs text-(--st-text-muted)">{it.variant_label}</div>
-                  </div>
-                  <div className="shrink-0 text-xs font-semibold text-(--st-text)">x{it.quantity}</div>
+        {/* Two-Column Detail + QRIS Payment */}
+        <div className="mt-8 grid gap-8 lg:grid-cols-12">
+          {/* Left: Summary & Items */}
+          <section className="space-y-6 lg:col-span-7">
+            <div className="rounded-3xl border border-(--st-border) bg-white p-6 sm:p-8">
+              <div className="flex items-center justify-between border-b border-(--st-border) pb-4">
+                <div className="flex items-center gap-2.5">
+                  <Receipt className="h-4 w-4 text-[#FF5500]" />
+                  <h2 className="font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+                    Ringkasan Item
+                  </h2>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-3xl border border-(--st-border) bg-white p-5 shadow-[0_12px_28px_rgba(17,24,39,0.10)]">
-          <div className="text-sm font-semibold text-(--st-text)">Bayar via QRIS</div>
-          <div className="mt-1 text-sm text-(--st-text-muted)">
-            Scan QRIS toko, bayar sesuai total, lalu upload bukti bayar.
-          </div>
-
-          {settings.qris_image_url ? (
-            <div className="mt-4 overflow-hidden rounded-2xl border border-(--st-border) bg-white">
-              <div className="relative aspect-square bg-[#F7F8FA]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={settings.qris_image_url}
-                  alt={`QRIS ${settings.store_name}`}
-                  className="h-full w-full object-contain"
-                />
+                <span className="font-display text-xl font-semibold tracking-tight text-[#0D0D0D]">
+                  {formatIDR(order.total_amount)}
+                </span>
               </div>
-            </div>
-          ) : (
-            <div className="mt-4 rounded-2xl border border-(--st-border) bg-[#F7F8FA] p-4 text-sm text-(--st-text-muted)">
-              QRIS belum tersedia. Silakan hubungi admin toko.
-            </div>
-          )}
 
-          {settings.payment_instructions ? (
-            <div className="mt-4 rounded-2xl border border-(--st-border) bg-[#F7F8FA] p-4 text-sm text-(--st-text)">
-              <div className="font-medium">Instruksi</div>
-              <div className="mt-1 whitespace-pre-wrap text-sm text-(--st-text-muted)">
-                {settings.payment_instructions}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="mt-5">
-            <PaymentProofForm action={uploadProofAction} />
-          </div>
-
-          {(proofs ?? []).length > 0 ? (
-            <div className="mt-5">
-              <div className="text-sm font-semibold text-(--st-text)">Riwayat bukti bayar</div>
-              <div className="mt-3 grid gap-2">
-                {(proofs ?? []).map((p: { id: string; original_name: string | null; created_at: string }) => (
-                  <div
-                    key={p.id}
-                    className="flex items-start justify-between gap-3 rounded-2xl border border-(--st-border) bg-white px-4 py-3"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-xs font-medium text-(--st-text)">
-                        {p.original_name ?? "bukti-bayar"}
+              <div className="mt-4 divide-y divide-(--st-border)">
+                {(items ?? []).map(
+                  (it: {
+                    id: string;
+                    product_name: string;
+                    variant_label: string;
+                    quantity: number;
+                    price_at_purchase?: string;
+                  }) => (
+                    <div
+                      key={it.id}
+                      className="flex items-center justify-between gap-4 py-3.5"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-[#0D0D0D]">
+                          {it.product_name}
+                        </div>
+                        <div className="mt-0.5 font-mono-label text-[11px] uppercase text-(--st-text-muted)">
+                          Size: {it.variant_label}
+                        </div>
                       </div>
-                      <div className="mt-1 text-[11px] text-(--st-text-muted)">
-                        {formatDateTime(p.created_at)}
+                      <div className="shrink-0 text-right">
+                        <div className="font-mono-label text-xs font-semibold text-[#0D0D0D]">
+                          x{it.quantity}
+                        </div>
+                        {it.price_at_purchase ? (
+                          <div className="text-xs text-(--st-text-muted)">
+                            {formatIDR(it.price_at_purchase)}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
-                    <div className="shrink-0 text-[11px] text-(--st-text-muted)">Terkirim</div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
-          ) : null}
 
-          <div className="mt-4 text-[11px] text-(--st-text-muted)">
-            Verifikasi dilakukan manual. Setelah pembayaran diverifikasi, order akan diproses.
-          </div>
-        </section>
+            {(proofs ?? []).length > 0 ? (
+              <div className="rounded-3xl border border-(--st-border) bg-white p-6 sm:p-8">
+                <div className="flex items-center gap-2.5 border-b border-(--st-border) pb-4">
+                  <CheckCircle2 className="h-4 w-4 text-[#FF5500]" />
+                  <h2 className="font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+                    Riwayat Bukti Transfer Terkirim
+                  </h2>
+                </div>
+                <div className="mt-4 divide-y divide-(--st-border)">
+                  {(proofs ?? []).map(
+                    (p: {
+                      id: string;
+                      original_name: string | null;
+                      created_at: string;
+                    }) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between gap-3 py-3 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-[#0D0D0D]">
+                            {p.original_name ?? "bukti-bayar"}
+                          </div>
+                          <div className="mt-0.5 text-(--st-text-muted)">
+                            {formatDateTime(p.created_at)}
+                          </div>
+                        </div>
+                        <span className="rounded-full bg-(--st-accent-soft) px-3 py-1 font-mono-label text-[10px] font-semibold uppercase tracking-[0.1em] text-[#CC4400]">
+                          Terkirim
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </section>
+
+          {/* Right: QRIS & Proof Upload */}
+          <section className="lg:col-span-5">
+            <div className="rounded-3xl border border-(--st-border) bg-white p-6 sm:p-8">
+              <div className="flex items-center gap-2.5 border-b border-(--st-border) pb-4">
+                <QrCode className="h-4 w-4 text-[#FF5500]" />
+                <h2 className="font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+                  Pembayaran QRIS
+                </h2>
+              </div>
+
+              <p className="mt-4 text-xs leading-relaxed text-(--st-text-muted)">
+                Scan kode QRIS di bawah, transfer tepat sebesar{" "}
+                <strong className="text-[#0D0D0D]">{formatIDR(order.total_amount)}</strong>, lalu
+                unggah bukti screenshot pembayaranmu.
+              </p>
+
+              {settings.qris_image_url ? (
+                <div className="mt-5 rounded-2xl border border-(--st-border) bg-(--st-bg) p-4">
+                  <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={settings.qris_image_url}
+                      alt={`QRIS ${settings.store_name}`}
+                      className="h-full w-full object-contain p-3"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-(--st-border) bg-(--st-bg) p-5 text-xs text-(--st-text-muted)">
+                  QRIS toko belum dikonfigurasi oleh admin. Silakan hubungi tim SpaceTrip untuk
+                  konfirmasi rekening tujuan.
+                </div>
+              )}
+
+              {settings.payment_instructions ? (
+                <div className="mt-4 rounded-2xl border border-(--st-border) bg-(--st-bg) p-4 text-xs">
+                  <div className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-[#0D0D0D]">
+                    [Instruksi Pembayaran]
+                  </div>
+                  <div className="mt-1.5 whitespace-pre-wrap leading-relaxed text-(--st-text-muted)">
+                    {settings.payment_instructions}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="mt-6 border-t border-(--st-border) pt-5">
+                <PaymentProofForm action={uploadProofAction} />
+              </div>
+            </div>
+          </section>
+        </div>
       </main>
     </MobileShell>
   );

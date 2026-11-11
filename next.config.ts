@@ -3,24 +3,29 @@ import type { NextConfig } from "next";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 let supabaseHost: string | null = null;
+let supabaseProtocol: "http" | "https" = "https";
 try {
-  if (supabaseUrl) supabaseHost = new URL(supabaseUrl).hostname;
+  if (supabaseUrl) {
+    const parsed = new URL(supabaseUrl);
+    supabaseHost = parsed.hostname;
+    supabaseProtocol = parsed.protocol === "http:" ? "http" : "https";
+  }
 } catch {
   supabaseHost = null;
 }
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
+    dangerouslyAllowSVG: true,
     remotePatterns: [
-      // Default Supabase project domains
       { protocol: "https", hostname: "**.supabase.co" },
-      // Also allow the exact host from env (in case of custom domains)
-      ...(supabaseHost ? [{ protocol: "https" as const, hostname: supabaseHost }] : []),
+      { protocol: "http", hostname: "127.0.0.1" },
+      { protocol: "http", hostname: "localhost" },
+      ...(supabaseHost ? [{ protocol: supabaseProtocol, hostname: supabaseHost }] : []),
     ],
   },
   experimental: {
-    // Needed for product image uploads via Server Actions (multipart FormData)
-    // Increase carefully; for production consider direct-to-storage uploads.
     serverActions: {
       bodySizeLimit: "20mb",
     },

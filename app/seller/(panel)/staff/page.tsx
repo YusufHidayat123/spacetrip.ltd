@@ -15,7 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ROLE_LABELS, requireSuperAdmin, type StaffRole } from "@/lib/auth/roles";
+import {
+  ROLE_LABELS,
+  requireSuperAdmin,
+  type StaffRole,
+} from "@/lib/auth/roles";
 import {
   adminCreateStaffAccount,
   adminListTeamMembers,
@@ -27,9 +31,9 @@ import { StaffActionsMenu } from "./_components/staff-actions-menu";
 
 function RoleBadge({ role }: { role: StaffRole }) {
   return role === "admin" ? (
-    <Badge variant="purple">Super Admin</Badge>
+    <Badge variant="dark">Super Admin</Badge>
   ) : (
-    <Badge variant="blue">Karyawan</Badge>
+    <Badge variant="orangeSoft">Karyawan</Badge>
   );
 }
 
@@ -100,98 +104,96 @@ export default async function StaffPage({
   return (
     <PageShell>
       <PageHeader
-        title="Kelola User"
-        badge={<Badge variant="purple">Super Admin only</Badge>}
+        title="Kelola Tim & Staff"
+        description={`Akses terbatas Super Admin untuk mengelola akun ${ROLE_LABELS.admin} dan ${ROLE_LABELS.seller}.`}
+        badge={<Badge variant="orangeSoft">Super Admin Only</Badge>}
         breadcrumb={
           <Breadcrumb
             items={[
               { label: "admin", href: "/seller" },
-              { label: "kelola user" },
+              { label: "kelola tim" },
             ]}
           />
         }
+        right={<AddUserModal action={createStaffAction} />}
       />
 
       {status === "created" ? (
-        <div className="mt-6 rounded-lg border border-[#D1FAE5] bg-[#ECFDF5] px-4 py-3 text-sm text-[#047857]">
+        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-medium text-emerald-800">
           Akun staff berhasil dibuat.
         </div>
       ) : status === "updated" ? (
-        <div className="mt-6 rounded-lg border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-3 text-sm text-[#1D4ED8]">
+        <div className="mt-6 rounded-2xl border border-(--st-accent-border) bg-(--st-accent-soft) px-4 py-3 text-xs font-medium text-[#CC4400]">
           Role/profil staff berhasil diperbarui.
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-6">
-        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-(--st-text)">
-                <ShieldCheck className="h-4 w-4" />
-                Daftar user internal
-              </div>
-              <div className="mt-1 text-xs text-(--st-text-muted)">
-                Hanya akun dengan role {ROLE_LABELS.admin} atau {ROLE_LABELS.seller} yang ditampilkan.
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="neutral">{team.length} akun</Badge>
-              <AddUserModal action={createStaffAction} />
-            </div>
+      <section className="mt-6 overflow-hidden rounded-3xl border border-(--st-border) bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--st-border) px-6 py-4">
+          <div className="flex items-center gap-2 font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+            <ShieldCheck className="h-4 w-4 text-[#FF5500]" />
+            Daftar Akun Operasional ({team.length})
           </div>
+          <span className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text-muted)">
+            [Team Access Control]
+          </span>
+        </div>
 
-          <div className="mt-5 overflow-hidden rounded-lg border border-(--st-border)">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Akun</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Kontak</TableHead>
-                  <TableHead>Aktivitas</TableHead>
-                  <TableHead className="w-32">Aksi</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Akun</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Kontak</TableHead>
+              <TableHead>Aktivitas</TableHead>
+              <TableHead className="w-24 text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {team.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="py-10 text-center text-xs text-(--st-text-muted)"
+                >
+                  Belum ada user internal.
+                </TableCell>
+              </TableRow>
+            ) : (
+              team.map((member) => (
+                <TableRow key={member.id}>
+                  <TableCell>
+                    <div className="font-medium text-[#0D0D0D]">
+                      {member.full_name || "—"}
+                    </div>
+                    <div className="mt-0.5 text-xs text-(--st-text-muted)">
+                      {member.email ?? "—"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <RoleBadge role={member.role} />
+                  </TableCell>
+                  <TableCell className="text-xs text-(--st-text-muted)">
+                    {member.phone || "—"}
+                  </TableCell>
+                  <TableCell className="text-xs text-(--st-text-muted)">
+                    <div>Dibuat: {formatDateTime(member.created_at)}</div>
+                    <div className="mt-0.5">
+                      Login terakhir:{" "}
+                      {member.last_sign_in_at
+                        ? formatDateTime(member.last_sign_in_at)
+                        : "—"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <StaffActionsMenu member={member} action={updateStaffAction} />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {team.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-sm text-(--st-text-muted)">
-                      Belum ada user internal.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  team.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <div className="font-medium text-(--st-text)">
-                          {member.full_name || "—"}
-                        </div>
-                        <div className="mt-1 text-xs text-(--st-text-muted)">
-                          {member.email ?? "—"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <RoleBadge role={member.role} />
-                      </TableCell>
-                      <TableCell className="text-sm text-(--st-text-muted)">
-                        {member.phone || "—"}
-                      </TableCell>
-                      <TableCell className="text-xs text-(--st-text-muted)">
-                        <div>Dibuat: {formatDateTime(member.created_at)}</div>
-                        <div className="mt-1">
-                          Login terakhir: {member.last_sign_in_at ? formatDateTime(member.last_sign_in_at) : "—"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StaffActionsMenu member={member} action={updateStaffAction} />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </section>
-      </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </section>
     </PageShell>
   );
 }

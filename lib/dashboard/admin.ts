@@ -15,14 +15,12 @@ function startOfMonth(d: Date) {
 }
 
 function isoMonth(d: Date) {
-  // YYYY-MM (local)
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   return `${yyyy}-${mm}`;
 }
 
 function isoDay(d: Date) {
-  // YYYY-MM-DD (local)
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -57,57 +55,57 @@ export async function adminGetSidebarCounts() {
 export async function adminGetDashboardOverview(params?: { salesMode?: SalesMode }) {
   const supabase = createSupabaseAdminClient();
 
-  // Counts
-  const [totalOrdersRes, newOrdersRes, needReviewRes] = await Promise.all([
-    supabase.from("orders").select("id", { count: "exact", head: true }),
-    supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "new"),
-    supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("payment_status", "submitted"),
-  ]);
+  const [totalOrdersRes, newOrdersRes, needReviewRes, activeProductsRes, verifiedOrdersAmtRes] =
+    await Promise.all([
+      supabase.from("orders").select("id", { count: "exact", head: true }),
+      supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "new"),
+      supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .eq("payment_status", "submitted"),
+      supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active"),
+      supabase
+        .from("orders")
+        .select("total_amount")
+        .eq("payment_status", "verified"),
+    ]);
 
   if (totalOrdersRes.error) throw totalOrdersRes.error;
   if (newOrdersRes.error) throw newOrdersRes.error;
   if (needReviewRes.error) throw needReviewRes.error;
-
-  const [activeProductsRes] = await Promise.all([
-    supabase
-      .from("products")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "active"),
-  ]);
-
   if (activeProductsRes.error) throw activeProductsRes.error;
+  if (verifiedOrdersAmtRes.error) throw verifiedOrdersAmtRes.error;
 
   const totalOrders = totalOrdersRes.count ?? 0;
   const newOrders = newOrdersRes.count ?? 0;
   const needReview = needReviewRes.count ?? 0;
   const activeProducts = activeProductsRes.count ?? 0;
 
-  // Revenue + orders by day (last 14 days)
+  const verifiedRevenue = (verifiedOrdersAmtRes.data ?? []).reduce(
+    (sum, r: { total_amount: string }) => sum + (Number(r.total_amount) || 0),
+    0
+  );
+
   const now = new Date();
-
   const salesMode: SalesMode = params?.salesMode ?? "verified";
-
-  // Monthly sales - last 12 months
   const start12m = startOfMonth(new Date(now.getFullYear(), now.getMonth() - 11, 1));
-
-  // Daily sales - last 30 days
   const start30d = startOfDay(new Date(now.getTime() - 29 * 24 * 60 * 60 * 1000));
 
   let monthQuery = supabase
     .from("orders")
-    .select("id,created_at,payment_status,status")
+    .select("id,created_at,payment_status,status,total_amount")
     .gte("created_at", start12m.toISOString())
     .order("created_at", { ascending: true });
 
   let dayQuery = supabase
     .from("orders")
-    .select("id,created_at,payment_status,status")
+    .select("id,created_at,payment_status,status,total_amount")
     .gte("created_at", start30d.toISOString())
     .order("created_at", { ascending: true });
 
@@ -119,24 +117,27 @@ export async function adminGetDashboardOverview(params?: { salesMode?: SalesMode
     dayQuery = dayQuery.eq("status", "completed");
   }
 
-  const [{ data: salesMonthRows, error: salesMonthErr }, { data: salesDayRows, error: salesDayErr }, { data: recentOrders, error: recentErr }, { data: variantRows, error: variantsErr }] =
-    await Promise.all([
-      monthQuery,
-      dayQuery,
-      supabase
-        .from("orders")
-        .select("id,order_number,created_at,total_amount,payment_status,status,customer_name")
-        .order("created_at", { ascending: false })
-        .limit(6),
-      // Build product stock leaderboard from variants (active products only)
-      supabase
-        .from("product_variants")
-        .select(
-          "id,stock,is_active,products!inner(id,name,slug,status,product_images(id,storage_path,alt,sort_order))"
-        )
-        .eq("is_active", true)
-        .eq("products.status", "active"),
-    ]);
+  const [
+    { data: salesMonthRows, error: salesMonthErr },
+    { data: salesDayRows, error: salesDayErr },
+    { data: recentOrders, error: recentErr },
+    { data: variantRows, error: variantsErr },
+  ] = await Promise.all([
+    monthQuery,
+    dayQuery,
+    supabase
+      .from("orders")
+      .select("id,order_number,created_at,total_amount,payment_status,status,customer_name")
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("product_variants")
+      .select(
+        "id,stock,is_active,products!inner(id,name,slug,status,product_images(id,storage_path,alt,sort_order))"
+      )
+      .eq("is_active", true)
+      .eq("products.status", "active"),
+  ]);
 
   if (salesMonthErr) throw salesMonthErr;
   if (salesDayErr) throw salesDayErr;
@@ -198,7 +199,10 @@ export async function adminGetDashboardOverview(params?: { salesMode?: SalesMode
   for (const row of (variantRows as unknown as VariantWithProduct[]) ?? []) {
     const p = row.products;
     const existing = byProduct.get(p.id);
-    const primary = (p.product_images ?? []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0] ?? null;
+    const primary =
+      (p.product_images ?? [])
+        .slice()
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0] ?? null;
 
     if (!existing) {
       byProduct.set(p.id, {
@@ -216,8 +220,15 @@ export async function adminGetDashboardOverview(params?: { salesMode?: SalesMode
     }
   }
 
-  const topProductsByStock = Array.from(byProduct.values())
+  const allInventory = Array.from(byProduct.values());
+  const topProductsByStock = allInventory
+    .slice()
     .sort((a, b) => b.totalStock - a.totalStock)
+    .slice(0, 5);
+
+  const lowStockProducts = allInventory
+    .filter((p) => p.totalStock <= 2)
+    .sort((a, b) => a.totalStock - b.totalStock)
     .slice(0, 5);
 
   return {
@@ -226,11 +237,14 @@ export async function adminGetDashboardOverview(params?: { salesMode?: SalesMode
       newOrders,
       needReview,
       activeProducts,
+      verifiedRevenue,
+      lowStockCount: allInventory.filter((p) => p.totalStock <= 2).length,
     },
     salesMode,
     salesByMonth12m: months,
     salesByDay30d: days,
     topProductsByStock,
+    lowStockProducts,
     recentOrders: recentOrders ?? [],
   };
 }

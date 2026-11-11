@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import * as React from "react";
-
 import { Upload } from "lucide-react";
 
 import { SubmitButton } from "@/components/form/submit-button";
@@ -46,9 +44,7 @@ export function PaymentProofForm({
 
     const mb = file.size / (1024 * 1024);
     if (mb > MAX_MB) {
-      setError(
-        `File ~${mb.toFixed(1)} MB. Pilih gambar yang lebih kecil (maks ~${MAX_MB} MB).`
-      );
+      setError(`File ~${mb.toFixed(1)} MB. Pilih gambar yang lebih kecil (maks ~${MAX_MB} MB).`);
     } else {
       setError(null);
     }
@@ -60,62 +56,56 @@ export function PaymentProofForm({
     });
   }
 
-  let helper: React.ReactNode = (
-    <div className="text-xs text-(--st-text-muted)">
-      Upload screenshot dari aplikasi e-wallet / mobile banking kamu.
-    </div>
-  );
-
-  if (error) {
-    helper = <div className="text-xs text-[#B91C1C]">{error}</div>;
-  } else if (preview) {
-    helper = (
-      <div className="text-xs text-(--st-text-muted)">
-        Terpilih: <span className="font-medium text-(--st-text)">{preview.name}</span>{" "}
-        ({formatBytes(preview.size)})
-      </div>
-    );
-  }
-
   return (
-    <form action={action} encType="multipart/form-data" className="grid gap-3">
-      <label className="text-sm font-medium text-(--st-text)">
-        Upload bukti bayar
+    <form action={action} encType="multipart/form-data" className="grid gap-3.5">
+      <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0D0D0D]">
+        [Upload Bukti Transfer QRIS]
       </label>
 
-      <div className="grid gap-3">
-        <div className="grid gap-2">
-          <Input name="proof" type="file" accept="image/*" required onChange={onChange} />
-          {helper}
-        </div>
-
-          <SubmitButton
-            pendingText="Mengunggah..."
-            disabled={Boolean(error)}
-            className="h-11 w-full rounded-full"
-          >
-            <Upload className="h-4 w-4" />
-            Kirim bukti
-          </SubmitButton>
+      <div className="grid gap-2">
+        <Input
+          name="proof"
+          type="file"
+          accept="image/*"
+          required
+          onChange={onChange}
+          className="h-11 rounded-xl border-(--st-border) bg-(--st-bg) pt-2 text-xs file:mr-3 file:rounded-full file:border-0 file:bg-[#0D0D0D] file:px-3 file:py-1 file:font-mono-label file:text-[10px] file:uppercase file:text-white"
+        />
+        {error ? (
+          <div className="text-xs text-red-700">{error}</div>
+        ) : preview ? (
+          <div className="text-xs text-(--st-text-muted)">
+            Terpilih: <span className="font-medium text-[#0D0D0D]">{preview.name}</span> (
+            {formatBytes(preview.size)})
+          </div>
+        ) : (
+          <div className="text-xs text-(--st-text-muted)">
+            Unggah tangkapan layar bukti berhasil dari mobile banking / e-wallet.
+          </div>
+        )}
       </div>
 
       {preview ? (
-        <div className="mt-1 overflow-hidden rounded-lg border border-(--st-border) bg-white">
-          <div className="relative aspect-video bg-[#F7F8FA]">
-            <Image
-              src={preview.url}
-              alt={preview.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 480px"
-              className="object-contain"
-              unoptimized
-            />
+        <div className="rounded-2xl border border-(--st-border) bg-(--st-bg) p-2">
+          <div className="relative aspect-video overflow-hidden rounded-xl bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview.url} alt={preview.name} className="h-full w-full object-contain" />
           </div>
         </div>
       ) : null}
 
-      <p className="text-xs text-(--st-text-muted)">
-        Verifikasi dilakukan manual. Order kamu akan diproses setelah pembayaran diverifikasi.
+      <SubmitButton
+        pendingText="Mengunggah..."
+        disabled={Boolean(error)}
+        className="h-12 w-full rounded-full bg-[#0D0D0D] font-mono-label text-xs font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#FF5500]"
+      >
+        <Upload className="h-4 w-4" />
+        Kirim Bukti Pembayaran
+      </SubmitButton>
+
+      <p className="text-[11px] leading-relaxed text-(--st-text-muted)">
+        Verifikasi dilakukan manual oleh admin. Pesanan akan langsung diproses setelah dana
+        terkonfirmasi.
       </p>
     </form>
   );

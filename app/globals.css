@@ -1,40 +1,144 @@
 @import "tailwindcss";
 
 :root {
-  /* App base */
-  --background: #ffffff;
-  --foreground: #111827;
+  /* SpaceTrip "Momento" Editorial Design System */
+  --background: #f3f3f1;
+  --foreground: #0d0d0d;
 
-  /* Spacetrip Admin UI tokens (Option A: Neutral + Yellow Accent) */
-  --st-bg: #f7f8fa; /* page background */
-  --st-surface: #ffffff; /* cards */
-  --st-text: #111827; /* primary text */
-  --st-text-muted: #6b7280; /* secondary text */
-  --st-border: #e6eaf0;
+  /* Core Canvas & Surfaces */
+  --st-bg: #f3f3f1; /* Cool Alabaster / Soft Light Gray */
+  --st-surface: #ffffff; /* Pure Crisp White */
+  --st-surface-alt: #e8e8e4; /* Soft Warm Gray Tile */
+  --st-text: #0d0d0d; /* Deep Carbon Black */
+  --st-text-muted: #7a7a75; /* Neutral Warm Gray */
+  --st-border: #dfdfda; /* Crisp Hairline Border */
 
-  /* Primary action (neutral) */
-  --st-primary: #111827;
-  --st-primary-hover: #0b1220;
+  /* Primary Actions */
+  --st-primary: #0d0d0d;
+  --st-primary-hover: #262624;
 
-  /* Brand accent (yellow) */
-  --st-accent: #f4b000;
-  --st-accent-soft: #fff4cc;
-  --st-accent-border: #ffe39a;
+  /* Signature Streetwear Orange Accent */
+  --st-accent: #ff5500;
+  --st-accent-hover: #ea4e00;
+  --st-accent-soft: #fff1e8;
+  --st-accent-border: #ffd2ba;
+
+  /* Status tokens */
+  --st-soldout: #991b1b;
+
+  /* Responsive Chamfer geometry tokens */
+  --chamfer: 18px;
+  --notch: 46px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --chamfer: 26px;
+    --notch: 58px;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
 
-  /* Tailwind font tokens */
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-roboto-mono);
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
-    "Segoe UI Emoji";
+  background: var(--st-bg);
+  color: var(--st-text);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  overflow-x: clip;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-mono-label {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Signature Asymmetric Chamfer & Notch Clip Shapes */
+.clip-chamfer-diagonal {
+  clip-path: polygon(
+    var(--chamfer) 0%,
+    100% 0%,
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0% 100%,
+    0% var(--chamfer)
+  );
+}
+
+.clip-chamfer-diagonal-sm {
+  --ch-sm: 14px;
+  clip-path: polygon(
+    var(--ch-sm) 0%,
+    100% 0%,
+    100% calc(100% - var(--ch-sm)),
+    calc(100% - var(--ch-sm)) 100%,
+    0% 100%,
+    0% var(--ch-sm)
+  );
+}
+
+.clip-chamfer-notch-tr {
+  clip-path: polygon(
+    var(--chamfer) 0%,
+    calc(100% - var(--notch)) 0%,
+    calc(100% - var(--notch)) var(--notch),
+    100% var(--notch),
+    100% calc(100% - var(--chamfer)),
+    calc(100% - var(--chamfer)) 100%,
+    0% 100%,
+    0% var(--chamfer)
+  );
+}
+
+.clip-chamfer-notch-br {
+  clip-path: polygon(
+    var(--chamfer) 0%,
+    100% 0%,
+    100% calc(100% - var(--notch)),
+    calc(100% - var(--notch)) calc(100% - var(--notch)),
+    calc(100% - var(--notch)) 100%,
+    0% 100%,
+    0% var(--chamfer)
+  );
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

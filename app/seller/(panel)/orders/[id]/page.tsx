@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { Breadcrumb } from "@/components/seller/breadcrumb";
@@ -10,7 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { SubmitButton } from "@/components/form/submit-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { adminGetOrder, adminSignPaymentProofUrl, adminUpdateOrder } from "@/lib/orders/admin";
+import {
+  adminGetOrder,
+  adminSignPaymentProofUrl,
+  adminUpdateOrder,
+} from "@/lib/orders/admin";
 import { formatDateTime, formatIDR } from "@/lib/orders/format";
 import type { OrderStatus, PaymentStatus } from "@/lib/orders/types";
 
@@ -26,7 +29,7 @@ function OrderBadge({ status }: { status: OrderStatus }) {
   if (status === "shipped") return <Badge variant="purple">dikirim</Badge>;
   if (status === "completed") return <Badge variant="green">selesai</Badge>;
   if (status === "cancelled") return <Badge variant="red">dibatalkan</Badge>;
-  if (status === "processing") return <Badge>diproses</Badge>;
+  if (status === "processing") return <Badge variant="dark">diproses</Badge>;
   return <Badge>baru</Badge>;
 }
 
@@ -64,7 +67,6 @@ export default async function SellerOrderDetailPage({
   async function verifyPaymentAction() {
     "use server";
 
-    // If verified, move fulfillment to processing (if still new)
     const nextStatus: OrderStatus = order.status === "new" ? "processing" : order.status;
 
     await adminUpdateOrder(id, {
@@ -88,7 +90,7 @@ export default async function SellerOrderDetailPage({
   return (
     <PageShell>
       <PageHeader
-        title="Kelola Pesanan"
+        title={`Order ${order.order_number}`}
         badge={
           <div className="flex items-center gap-2">
             <PaymentBadge status={order.payment_status} />
@@ -107,38 +109,40 @@ export default async function SellerOrderDetailPage({
       />
 
       <div className="mt-6 grid gap-6">
-        {/* Proofs first (so admin can review quickly) */}
-        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        {/* Payment Proof Inspection */}
+        <section className="rounded-3xl border border-(--st-border) bg-white p-6">
+          <div className="flex flex-col justify-between gap-4 border-b border-(--st-border) pb-4 lg:flex-row lg:items-center">
             <div>
-              <div className="text-sm font-semibold text-(--st-text)">
-                Bukti pembayaran
-              </div>
-              <div className="mt-1 text-xs text-(--st-text-muted)">
-                Review manual untuk pembayaran QRIS.
-              </div>
+              <h2 className="font-display text-lg font-medium tracking-tight text-[#0D0D0D]">
+                Bukti Pembayaran QRIS
+              </h2>
+              <p className="mt-0.5 text-xs text-(--st-text-muted)">
+                Periksa bukti pembayaran sebelum memindahkan pesanan ke proses packing.
+              </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <form action={verifyPaymentAction}>
                 <SubmitButton
                   pendingText="Memverifikasi..."
                   disabled={signedProofs.length === 0}
+                  className="h-10 rounded-full bg-[#0D0D0D] px-5 font-mono-label text-[11px] font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#FF5500]"
                 >
-                  Verifikasi pembayaran
+                  Verifikasi Pembayaran
                 </SubmitButton>
               </form>
 
-              <form action={rejectPaymentAction} className="flex items-center gap-2">
+              <form action={rejectPaymentAction} className="flex flex-wrap items-center gap-2">
                 <Input
                   name="reject_note"
                   placeholder="Alasan tolak (opsional)"
-                  className="h-10 w-60"
+                  className="h-10 w-56 rounded-xl border-(--st-border) bg-(--st-bg) text-xs"
                 />
                 <SubmitButton
                   pendingText="Menolak..."
                   variant="outline"
                   disabled={signedProofs.length === 0}
+                  className="h-10 rounded-full border-(--st-border)"
                 >
                   Tolak
                 </SubmitButton>
@@ -146,27 +150,26 @@ export default async function SellerOrderDetailPage({
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-4">
             {signedProofs.length === 0 ? (
-              <div className="text-sm text-(--st-text-muted)">
-                Belum ada bukti pembayaran.
+              <div className="text-xs text-(--st-text-muted)">
+                Customer belum mengunggah bukti pembayaran.
               </div>
             ) : (
               signedProofs.map((p) => (
                 <div
                   key={p.id}
-                  className="w-55 overflow-hidden rounded-xl border border-(--st-border) bg-white"
+                  className="w-60 overflow-hidden rounded-2xl border border-(--st-border) bg-white"
                 >
-                  <div className="relative aspect-4/3 bg-[#F7F8FA]">
-                    <Image
+                  <div className="relative aspect-[4/3] bg-(--st-bg)">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={p.signed_url}
                       alt={p.original_name ?? "bukti pembayaran"}
-                      fill
-                      sizes="220px"
-                      className="object-contain"
+                      className="h-full w-full object-contain"
                     />
                   </div>
-                  <div className="p-3">
+                  <div className="border-t border-(--st-border) p-3">
                     <div className="truncate text-xs font-medium text-(--st-text)">
                       {p.original_name ?? "bukti pembayaran"}
                     </div>
@@ -179,95 +182,86 @@ export default async function SellerOrderDetailPage({
             )}
           </div>
 
-          <div className="mt-4 rounded-lg border border-(--st-border) bg-[#F7F8FA] p-4 text-sm">
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-              <div>
-                <div className="text-xs font-medium text-(--st-text-muted)">
-                  Total pesanan
-                </div>
-                <div className="mt-1 font-semibold text-(--st-text)">
-                  {formatIDR(order.total_amount)}
-                </div>
+          <div className="mt-5 grid grid-cols-1 gap-4 rounded-2xl border border-(--st-border) bg-(--st-bg) p-4 text-xs sm:grid-cols-3">
+            <div>
+              <div className="font-mono-label text-[10px] uppercase text-(--st-text-muted)">
+                Total Tagihan
               </div>
-              <div>
-                <div className="text-xs font-medium text-(--st-text-muted)">
-                  Status pembayaran
-                </div>
-                <div className="mt-1">
-                  <PaymentBadge status={order.payment_status} />
-                </div>
+              <div className="mt-1 font-display text-base font-semibold text-[#0D0D0D]">
+                {formatIDR(order.total_amount)}
               </div>
-              <div>
-                <div className="text-xs font-medium text-(--st-text-muted)">
-                  Batas bayar
-                </div>
-                <div className="mt-1 text-sm text-(--st-text)">
-                  {order.pay_by ? formatDateTime(order.pay_by) : "—"}
-                </div>
+            </div>
+            <div>
+              <div className="font-mono-label text-[10px] uppercase text-(--st-text-muted)">
+                Status Bayar
+              </div>
+              <div className="mt-1">
+                <PaymentBadge status={order.payment_status} />
+              </div>
+            </div>
+            <div>
+              <div className="font-mono-label text-[10px] uppercase text-(--st-text-muted)">
+                Batas Bayar
+              </div>
+              <div className="mt-1 font-medium text-(--st-text)">
+                {order.pay_by ? formatDateTime(order.pay_by) : "—"}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Order details */}
-        <section className="rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        {/* Order & Shipping Management */}
+        <section className="rounded-3xl border border-(--st-border) bg-white p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-(--st-border) pb-4">
             <div>
-              <div className="text-sm font-semibold text-(--st-text)">
-                Detail pesanan
-              </div>
-              <div className="mt-1 text-xs text-(--st-text-muted)">
-                Update status pembayaran dan pemenuhan pesanan di satu tempat.
-              </div>
-            </div>
-            <div className="text-right text-xs text-(--st-text-muted)">
-              Dibuat: {formatDateTime(order.created_at)}
+              <h2 className="font-display text-lg font-medium tracking-tight text-[#0D0D0D]">
+                Detail Customer &amp; Pemenuhan
+              </h2>
+              <p className="mt-0.5 text-xs text-(--st-text-muted)">
+                Dibuat: {formatDateTime(order.created_at)}
+              </p>
             </div>
           </div>
 
           <form action={updateOrderAction} className="mt-5 grid gap-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-(--st-border) p-4">
-                <div className="text-xs font-medium text-(--st-text-muted)">
-                  Pelanggan
+              <div className="rounded-2xl border border-(--st-border) bg-(--st-bg) p-4">
+                <div className="font-mono-label text-[10px] uppercase tracking-[0.12em] text-(--st-text-muted)">
+                  [Pelanggan]
                 </div>
-                <div className="mt-2 text-sm font-semibold text-(--st-text)">
+                <div className="mt-2 text-sm font-semibold text-[#0D0D0D]">
                   {order.customer_name}
                 </div>
-                <div className="mt-1 text-sm text-(--st-text-muted)">
+                <div className="mt-1 text-xs text-(--st-text-muted)">
                   {order.customer_email ?? "—"}
                 </div>
-                <div className="mt-1 text-sm text-(--st-text-muted)">
+                <div className="mt-1 text-xs text-(--st-text-muted)">
                   {order.customer_phone ?? "—"}
                 </div>
               </div>
 
-              <div className="rounded-lg border border-(--st-border) p-4">
-                <div className="text-xs font-medium text-(--st-text-muted)">
-                  Pengiriman
+              <div className="rounded-2xl border border-(--st-border) bg-(--st-bg) p-4">
+                <div className="font-mono-label text-[10px] uppercase tracking-[0.12em] text-(--st-text-muted)">
+                  [Alamat Pengiriman]
                 </div>
-                <div className="mt-2 text-sm text-(--st-text)">
+                <div className="mt-2 text-xs font-medium text-[#0D0D0D]">
                   {order.shipping_address?.line1 ?? "—"}
                 </div>
-                <div className="mt-1 text-sm text-(--st-text-muted)">
+                <div className="mt-1 text-xs text-(--st-text-muted)">
                   {(order.shipping_address?.city ?? "") +
-                    (order.shipping_address?.province
-                      ? `, ${order.shipping_address.province}`
-                      : "")}
-                </div>
-                <div className="mt-1 text-sm text-(--st-text-muted)">
+                    (order.shipping_address?.province ? `, ${order.shipping_address.province}` : "")}{" "}
                   {order.shipping_address?.postal_code ?? ""}
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <label className="text-sm font-medium text-(--st-text)">
-                  Status pembayaran
+              <div className="grid gap-1.5">
+                <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+                  Status Pembayaran
                 </label>
                 <select
                   name="payment_status"
                   defaultValue={order.payment_status}
-                  className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-10 rounded-xl border border-(--st-border) bg-(--st-bg) px-3 text-sm text-(--st-text) focus:border-[#0D0D0D] focus:outline-none"
                 >
                   <option value="unpaid">Belum bayar</option>
                   <option value="submitted">Bukti masuk</option>
@@ -277,14 +271,14 @@ export default async function SellerOrderDetailPage({
                 </select>
               </div>
 
-              <div className="grid gap-2">
-                <label className="text-sm font-medium text-(--st-text)">
-                  Status pesanan
+              <div className="grid gap-1.5">
+                <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+                  Status Pesanan
                 </label>
                 <select
                   name="status"
                   defaultValue={order.status}
-                  className="h-10 rounded-md border border-(--st-border) bg-white px-3 text-sm text-(--st-text) focus:outline-none focus:ring-2 focus:ring-(--st-accent) focus:ring-offset-2 focus:ring-offset-white"
+                  className="h-10 rounded-xl border border-(--st-border) bg-(--st-bg) px-3 text-sm text-(--st-text) focus:border-[#0D0D0D] focus:outline-none"
                 >
                   <option value="new">Baru</option>
                   <option value="processing">Diproses</option>
@@ -294,22 +288,23 @@ export default async function SellerOrderDetailPage({
                 </select>
               </div>
 
-              <div className="md:col-span-2 grid gap-2">
-                <label className="text-sm font-medium text-(--st-text)">
-                  Catatan admin
+              <div className="grid gap-1.5 md:col-span-2">
+                <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+                  Catatan Admin / Nomor Resi
                 </label>
                 <Textarea
                   name="admin_note"
                   defaultValue={order.admin_note ?? ""}
-                  placeholder="Catatan internal (opsional)"
+                  placeholder="Contoh: JNE Reguler JKT1234567890"
+                  className="rounded-xl border-(--st-border) bg-(--st-bg)"
                 />
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-(--st-border)">
+            <div className="overflow-x-auto rounded-2xl border border-(--st-border)">
               <table className="w-full text-sm">
-                <thead className="border-b border-(--st-border)">
-                  <tr className="text-xs font-medium text-(--st-text-muted)">
+                <thead className="border-b border-(--st-border) bg-(--st-bg)">
+                  <tr className="font-mono-label text-[10px] uppercase tracking-[0.12em] text-(--st-text-muted)">
                     <th className="px-4 py-3 text-left">Produk</th>
                     <th className="px-4 py-3 text-left">Varian</th>
                     <th className="px-4 py-3 text-right">Qty</th>
@@ -318,16 +313,13 @@ export default async function SellerOrderDetailPage({
                 </thead>
                 <tbody>
                   {items.map((it) => (
-                    <tr
-                      key={it.id}
-                      className="border-b border-(--st-border) last:border-0"
-                    >
-                      <td className="px-4 py-3 font-medium">{it.product_name}</td>
-                      <td className="px-4 py-3 text-(--st-text-muted)">
+                    <tr key={it.id} className="border-b border-(--st-border) last:border-0">
+                      <td className="px-4 py-3 text-xs font-medium">{it.product_name}</td>
+                      <td className="px-4 py-3 text-xs text-(--st-text-muted)">
                         {it.variant_label}
                       </td>
-                      <td className="px-4 py-3 text-right">{it.quantity}</td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right text-xs">{it.quantity}</td>
+                      <td className="px-4 py-3 text-right text-xs font-semibold">
                         {formatIDR(it.price_at_purchase)}
                       </td>
                     </tr>
@@ -337,7 +329,12 @@ export default async function SellerOrderDetailPage({
             </div>
 
             <div className="flex items-center justify-end">
-              <SubmitButton pendingText="Menyimpan...">Simpan perubahan</SubmitButton>
+              <SubmitButton
+                pendingText="Menyimpan..."
+                className="h-11 rounded-full bg-[#0D0D0D] px-6 font-mono-label text-[11px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#FF5500]"
+              >
+                Simpan Perubahan
+              </SubmitButton>
             </div>
           </form>
         </section>

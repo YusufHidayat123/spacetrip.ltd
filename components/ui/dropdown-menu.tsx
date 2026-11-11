@@ -64,7 +64,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-md border border-(--st-border) bg-white p-1 text-(--st-text) shadow-[0_8px_24px_rgba(17,24,39,0.06)]",
+        "z-50 min-w-[8rem] overflow-hidden rounded-2xl border border-(--st-border) bg-white p-1.5 text-(--st-text) shadow-[0_8px_24px_rgba(13,13,13,0.08)]",
         className
       )}
       {...props}
@@ -85,7 +85,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-md px-2 py-1.5 text-sm outline-none transition-colors focus:bg-[#F7F8FA] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-default select-none items-center rounded-xl px-2.5 py-1.5 text-sm outline-none transition-colors focus:bg-(--st-bg) focus:text-[#FF5500] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className
     )}

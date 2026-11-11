@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { Category, Product, ProductImage, ProductVariant } from "./types";
+import type { Category, Product, ProductGender, ProductImage, ProductVariant } from "./types";
 
 export async function adminListCategories() {
   const supabase = createSupabaseAdminClient();
@@ -57,6 +57,7 @@ export async function adminUpdateCategory(
 export async function adminListProducts(params?: {
   q?: string;
   status?: "draft" | "active" | "all";
+  gender?: ProductGender | "all";
   page?: number;
   pageSize?: number;
 }) {
@@ -70,7 +71,7 @@ export async function adminListProducts(params?: {
   let query = supabase
     .from("products")
     .select(
-      "id,category_id,name,slug,price,status,created_at,updated_at,categories(id,name,slug),product_images(id,storage_path,sort_order),product_variants(id,size_label,stock,is_active)",
+      "id,category_id,name,slug,price,original_price,status,gender,condition,badge,is_featured,created_at,updated_at,categories(id,name,slug),product_images(id,storage_path,sort_order),product_variants(id,size_label,stock,is_active)",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -78,6 +79,10 @@ export async function adminListProducts(params?: {
 
   if (params?.status && params.status !== "all") {
     query = query.eq("status", params.status);
+  }
+
+  if (params?.gender && params.gender !== "all") {
+    query = query.eq("gender", params.gender);
   }
 
   if (params?.q && params.q.trim().length > 0) {
@@ -102,6 +107,15 @@ export async function adminCreateProduct(input: {
   description: string | null;
   price: number;
   status: "draft" | "active";
+  gender?: ProductGender;
+  condition?: string | null;
+  color?: string | null;
+  material?: string | null;
+  original_price?: number | null;
+  style_tags?: string[];
+  measurements?: string | null;
+  badge?: string | null;
+  is_featured?: boolean;
   variants: { size_label: string; stock: number }[];
   images?: { storage_path: string; sort_order: number; alt?: string | null }[];
 }) {
@@ -113,7 +127,6 @@ export async function adminCreateProduct(input: {
     .from("products")
     .insert({
       ...product,
-      // Supabase accepts number for numeric; it will store numeric(12,2)
     })
     .select("*")
     .single();
@@ -171,6 +184,15 @@ export async function adminUpdateProduct(
     description: string | null;
     price: number;
     status: "draft" | "active";
+    gender?: ProductGender;
+    condition?: string | null;
+    color?: string | null;
+    material?: string | null;
+    original_price?: number | null;
+    style_tags?: string[];
+    measurements?: string | null;
+    badge?: string | null;
+    is_featured?: boolean;
   }
 ) {
   const supabase = createSupabaseAdminClient();
@@ -199,17 +221,15 @@ export async function adminUpsertProductVariants(
   const inserts = variants.filter((v) => !v.id);
 
   if (updates.length > 0) {
-    const { error } = await supabase
-      .from("product_variants")
-      .upsert(
-        updates.map((v) => ({
-          id: v.id,
-          product_id: productId,
-          size_label: v.size_label,
-          stock: v.stock,
-          is_active: v.is_active,
-        }))
-      );
+    const { error } = await supabase.from("product_variants").upsert(
+      updates.map((v) => ({
+        id: v.id,
+        product_id: productId,
+        size_label: v.size_label,
+        stock: v.stock,
+        is_active: v.is_active,
+      }))
+    );
     if (error) throw error;
   }
 

@@ -11,6 +11,8 @@ export const productVariantInputSchema = z.object({
   stock: z.number().int().min(0),
 });
 
+export const genderEnum = z.enum(["men", "women", "unisex", "accessories"]);
+
 export const productSchema = z.object({
   name: z.string().min(2).max(120),
   slug: z.string().min(2).max(140),
@@ -18,6 +20,15 @@ export const productSchema = z.object({
   description: z.string().max(4000).optional().nullable(),
   price: z.number().min(0),
   status: z.enum(["draft", "active"]).default("draft"),
+  gender: genderEnum.default("unisex"),
+  condition: z.string().max(60).optional().nullable(),
+  color: z.string().max(80).optional().nullable(),
+  material: z.string().max(160).optional().nullable(),
+  original_price: z.number().min(0).optional().nullable(),
+  style_tags: z.array(z.string()).default([]),
+  measurements: z.string().max(300).optional().nullable(),
+  badge: z.string().max(40).optional().nullable(),
+  is_featured: z.boolean().default(false),
   variants: z.array(productVariantInputSchema).min(1),
 });
 
@@ -28,6 +39,15 @@ export const productUpdateSchema = z.object({
   description: z.string().max(4000).optional().nullable(),
   price: z.number().min(0),
   status: z.enum(["draft", "active"]),
+  gender: genderEnum.default("unisex"),
+  condition: z.string().max(60).optional().nullable(),
+  color: z.string().max(80).optional().nullable(),
+  material: z.string().max(160).optional().nullable(),
+  original_price: z.number().min(0).optional().nullable(),
+  style_tags: z.array(z.string()).default([]),
+  measurements: z.string().max(300).optional().nullable(),
+  badge: z.string().max(40).optional().nullable(),
+  is_featured: z.boolean().default(false),
   variants: z
     .array(
       z.object({

@@ -1,32 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import * as React from "react";
-
 import { Plus, Trash2, Upload } from "lucide-react";
 
 import { SubmitButton } from "@/components/form/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { slugify } from "@/lib/catalog/slug";
 
 export type CategoryOption = { id: string; name: string };
 
 type VariantRow = { size_label: string; stock: number | "" };
-
-type ImagePreview = {
-  url: string;
-  name: string;
-  size: number;
-};
+type ImagePreview = { url: string; name: string; size: number };
 
 export function ProductForm({
   categories,
@@ -39,15 +25,10 @@ export function ProductForm({
   const [slug, setSlug] = React.useState("");
   const [slugTouched, setSlugTouched] = React.useState(false);
 
-  const [categoryId, setCategoryId] = React.useState<string>(
-    categories[0]?.id ?? ""
-  );
-  const [status, setStatus] = React.useState<"draft" | "active">("draft");
-
   const [variants, setVariants] = React.useState<VariantRow[]>([
-    { size_label: "S", stock: 0 },
-    { size_label: "M", stock: 0 },
-    { size_label: "L", stock: 0 },
+    { size_label: "M", stock: 1 },
+    { size_label: "L", stock: 1 },
+    { size_label: "XL", stock: 1 },
   ]);
 
   const [imagePreviews, setImagePreviews] = React.useState<ImagePreview[]>([]);
@@ -61,7 +42,6 @@ export function ProductForm({
 
   React.useEffect(() => {
     return () => {
-      // cleanup object URLs
       for (const p of imagePreviews) URL.revokeObjectURL(p.url);
     };
   }, [imagePreviews]);
@@ -72,7 +52,6 @@ export function ProductForm({
   function onImagesChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
 
-    // Only the first 5 will be uploaded; warn early to avoid accidental huge submits.
     if (files.length > 5) {
       setImageWarning("Kamu memilih lebih dari 5 gambar. Hanya 5 gambar pertama yang akan di-upload.");
     } else {
@@ -80,19 +59,17 @@ export function ProductForm({
     }
 
     const firstFive = files.slice(0, 5);
-
     const totalBytes = firstFive.reduce((sum, f) => sum + f.size, 0);
     const totalMb = totalBytes / (1024 * 1024);
 
     if (totalMb > SAFE_CLIENT_MB) {
       setImageSizeError(
-        `Total gambar ~${totalMb.toFixed(1)} MB. Ini bisa melewati batas upload Server Action (${MAX_ACTION_BODY_MB} MB). Pilih file yang lebih kecil.`
+        `Total gambar ~${totalMb.toFixed(1)} MB. Maks batas upload ${MAX_ACTION_BODY_MB} MB.`
       );
     } else {
       setImageSizeError(null);
     }
 
-    // revoke old URLs
     setImagePreviews((prev) => {
       for (const p of prev) URL.revokeObjectURL(p.url);
       return firstFive.map((f) => ({
@@ -107,159 +84,270 @@ export function ProductForm({
     if (bytes < 1024) return `${bytes} B`;
     const kb = bytes / 1024;
     if (kb < 1024) return `${kb.toFixed(0)} KB`;
-    const mb = kb / 1024;
-    return `${mb.toFixed(1)} MB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
   }
 
   function updateVariant(idx: number, patch: Partial<VariantRow>) {
-    setVariants((prev) =>
-      prev.map((v, i) => (i === idx ? { ...v, ...patch } : v))
-    );
+    setVariants((prev) => prev.map((v, i) => (i === idx ? { ...v, ...patch } : v)));
   }
 
   function addVariant() {
-    setVariants((prev) => [...prev, { size_label: "", stock: "" }]);
+    setVariants((prev) => [...prev, { size_label: "", stock: 1 }]);
   }
 
   function removeVariant(idx: number) {
     setVariants((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  const selectCls =
+    "h-10 rounded-xl border border-(--st-border) bg-(--st-bg) px-3 text-sm text-(--st-text) focus:border-[#0D0D0D] focus:outline-none";
+
   return (
-    <form action={action} className="grid gap-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Nama produk
-          </label>
-          <Input
-            name="name"
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-            placeholder="Spacetrip Basic Tee 180gsm"
-            required
-          />
+    <form action={action} className="grid gap-8">
+      {/* Core Identity */}
+      <div>
+        <div className="border-b border-(--st-border) pb-3 font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+          [01] Informasi Utama Produk
         </div>
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Nama Produk
+            </label>
+            <Input
+              name="name"
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+              placeholder="Contoh: Orbit Washed Boxy Tee 240gsm"
+              required
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
 
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Slug
-          </label>
-          <Input
-            name="slug"
-            value={slug}
-            onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(slugify(e.target.value));
-            }}
-            placeholder="spacetrip-basic-tee-180gsm"
-            required
-          />
-        </div>
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Slug URL
+            </label>
+            <Input
+              name="slug"
+              value={slug}
+              onChange={(e) => {
+                setSlugTouched(true);
+                setSlug(slugify(e.target.value));
+              }}
+              placeholder="orbit-washed-boxy-tee"
+              required
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
 
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Kategori
-          </label>
-          <input type="hidden" name="category_id" value={categoryId} />
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger className="h-10">
-              <SelectValue placeholder="Pilih kategori" />
-            </SelectTrigger>
-            <SelectContent>
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Kategori
+            </label>
+            <select
+              name="category_id"
+              defaultValue={categories[0]?.id ?? ""}
+              required
+              className={selectCls}
+            >
               {categories.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
+                <option key={c.id} value={c.id}>
                   {c.name}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
-          {categories.length === 0 ? (
-            <p className="text-xs text-(--st-text-muted)">
-              Buat kategori dulu.
-            </p>
-          ) : null}
-        </div>
+            </select>
+          </div>
 
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Status
-          </label>
-          <input type="hidden" name="status" value={status} />
-          <Select
-            value={status}
-            onValueChange={(v) => setStatus(v as "draft" | "active")}
-          >
-            <SelectTrigger className="h-10">
-              <SelectValue placeholder="draft" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="active">Aktif</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Departemen (Gender)
+            </label>
+            <select name="gender" defaultValue="unisex" className={selectCls}>
+              <option value="men">Men</option>
+              <option value="women">Women</option>
+              <option value="unisex">Unisex</option>
+              <option value="accessories">Accessories</option>
+            </select>
+          </div>
 
-        <div className="grid gap-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Harga (IDR)
-          </label>
-          <Input
-            name="price"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={1000}
-            placeholder="149000"
-            required
-          />
-          <p className="text-xs text-(--st-text-muted)">
-            Simpan sebagai angka biasa, tanpa titik/koma pemisah.
-          </p>
-        </div>
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Harga Jual (IDR)
+            </label>
+            <Input
+              name="price"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1000}
+              placeholder="165000"
+              required
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
 
-        <div className="grid gap-2 md:col-span-2">
-          <label className="text-sm font-medium text-(--st-text)">
-            Deskripsi
-          </label>
-          <Textarea
-            name="description"
-            placeholder="Bahan, fit, kondisi, dan catatan perawatan..."
-          />
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Harga Coret / Retail (Opsional)
+            </label>
+            <Input
+              name="original_price"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1000}
+              placeholder="240000"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Status Publikasi
+            </label>
+            <select name="status" defaultValue="active" className={selectCls}>
+              <option value="active">Aktif (Tayang di Storefront)</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Badge / Label (Opsional)
+            </label>
+            <Input
+              name="badge"
+              placeholder="NEW / LIMITED / RARE ARCHIVE"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <div className="grid gap-1.5 md:col-span-2">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Deskripsi Editorial
+            </label>
+            <Textarea
+              name="description"
+              placeholder="Detail fit, karakter bahan, sejarah thrift, atau catatan kurasi..."
+              className="rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-(--st-border) p-4">
-        <div className="flex items-center justify-between gap-3">
+      {/* Curated Streetwear Attributes */}
+      <div>
+        <div className="border-b border-(--st-border) pb-3 font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+          [02] Detail Kurasi &amp; Spesifikasi
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Kondisi Item
+            </label>
+            <select name="condition" defaultValue="Like New" className={selectCls}>
+              <option value="Like New">Like New</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Very Good">Very Good</option>
+              <option value="Good">Good</option>
+            </select>
+          </div>
+
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Warna Utama
+            </label>
+            <Input
+              name="color"
+              placeholder="Washed Charcoal / Olive Drab"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Material / Kain
+            </label>
+            <Input
+              name="material"
+              placeholder="100% Heavyweight Cotton 240gsm"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <div className="grid gap-1.5">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Detail Pengukuran
+            </label>
+            <Input
+              name="measurements"
+              placeholder="Chest 116cm · Length 71cm"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <div className="grid gap-1.5 md:col-span-2">
+            <label className="font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] text-(--st-text)">
+              Style Tags (Pisahkan dengan koma)
+            </label>
+            <Input
+              name="style_tags"
+              placeholder="y2k-streetwear, minimal-daily, vintage-workwear, japanese-street"
+              className="h-10 rounded-xl border-(--st-border) bg-(--st-bg)"
+            />
+          </div>
+
+          <label className="flex items-center gap-2.5 text-xs font-medium text-(--st-text) md:col-span-2">
+            <input
+              type="checkbox"
+              name="is_featured"
+              className="h-4 w-4 accent-[#FF5500]"
+            />
+            Jadikan Editor&apos;s Pick (tampil menonjol di homepage &amp; featured)
+          </label>
+        </div>
+      </div>
+
+      {/* Size & Stock Variants */}
+      <div className="rounded-2xl border border-(--st-border) bg-(--st-bg) p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold text-(--st-text)">
-              Ukuran & stok
+            <div className="font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+              Ukuran &amp; Stok
             </div>
-            <div className="mt-1 text-xs text-(--st-text-muted)">
-              Label ukuran bebas (S/M/L, 42, One Size). Stok dihitung per ukuran.
+            <div className="mt-0.5 text-xs text-(--st-text-muted)">
+              Setiap ukuran memiliki stok terpisah yang otomatis berkurang saat checkout.
             </div>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addVariant}
+            className="rounded-full border-[#0D0D0D] bg-white hover:bg-[#0D0D0D] hover:text-white"
+          >
             <Plus className="h-4 w-4" />
-            Tambah ukuran
+            Tambah Ukuran
           </Button>
         </div>
 
         <div className="mt-4 grid gap-2">
-          <div className="grid grid-cols-[1fr_140px_44px] gap-2 text-xs font-medium text-(--st-text-muted)">
+          <div className="grid grid-cols-[1fr_110px_42px] gap-2 font-mono-label text-[10px] font-semibold uppercase text-(--st-text-muted)">
             <div className="px-1">Ukuran</div>
             <div className="px-1">Stok</div>
             <div />
           </div>
 
           {variants.map((v, idx) => (
-            <div key={idx} className="grid grid-cols-[1fr_140px_44px] gap-2">
+            <div key={idx} className="grid grid-cols-[1fr_110px_42px] gap-2">
               <Input
                 name="variant_size_label"
                 value={v.size_label}
                 onChange={(e) => updateVariant(idx, { size_label: e.target.value })}
-                placeholder="M"
+                placeholder="M / L / 32 / One Size"
                 required
+                className="h-10 rounded-xl border-(--st-border) bg-white"
               />
               <Input
                 name="variant_stock"
@@ -272,8 +360,9 @@ export function ProductForm({
                     stock: e.target.value === "" ? "" : Number(e.target.value),
                   })
                 }
-                placeholder="0"
+                placeholder="1"
                 required
+                className="h-10 rounded-xl border-(--st-border) bg-white"
               />
               <Button
                 type="button"
@@ -281,6 +370,7 @@ export function ProductForm({
                 size="icon"
                 onClick={() => removeVariant(idx)}
                 aria-label="Hapus ukuran"
+                className="rounded-full"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -289,24 +379,22 @@ export function ProductForm({
         </div>
       </div>
 
-      <div className="rounded-lg border border-(--st-border) p-4">
-        <div className="text-sm font-semibold text-(--st-text)">
-          Gambar
+      {/* Product Imagery */}
+      <div className="rounded-2xl border border-(--st-border) bg-white p-5">
+        <div className="font-display text-base font-medium tracking-tight text-[#0D0D0D]">
+          Foto Produk
         </div>
-        <div className="mt-1 text-xs text-(--st-text-muted)">
-          Upload maksimal 5 gambar. Rekomendasi: WebP/JPG dengan framing mendekati persegi.
+        <div className="mt-0.5 text-xs text-(--st-text-muted)">
+          Upload hingga 5 gambar JPG/PNG/WebP beresolusi tinggi.
         </div>
-        {imageWarning ? (
-          <div className="mt-2 text-xs text-[#B45309]">{imageWarning}</div>
-        ) : null}
-        {imageSizeError ? (
-          <div className="mt-2 text-xs text-[#B91C1C]">{imageSizeError}</div>
-        ) : null}
+
+        {imageWarning ? <div className="mt-2 text-xs text-amber-700">{imageWarning}</div> : null}
+        {imageSizeError ? <div className="mt-2 text-xs text-red-700">{imageSizeError}</div> : null}
 
         <div className="mt-4">
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-(--st-border) bg-[#F7F8FA] px-4 py-6 text-sm font-medium text-(--st-text) hover:bg-[#F7F8FA]/70">
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-[#0D0D0D]/30 bg-(--st-bg) px-4 py-7 font-mono-label text-xs font-semibold uppercase tracking-[0.12em] text-(--st-text) transition hover:border-[#FF5500] hover:text-[#FF5500]">
             <Upload className="h-4 w-4" />
-            Pilih file
+            Pilih File Foto
             <input
               name="images"
               type="file"
@@ -323,22 +411,14 @@ export function ProductForm({
             {imagePreviews.map((p) => (
               <div
                 key={p.url}
-                className="overflow-hidden rounded-md border border-(--st-border) bg-white"
+                className="overflow-hidden rounded-2xl border border-(--st-border) bg-white"
               >
-                <div className="relative aspect-square w-full bg-[#F7F8FA]">
-                  <Image
-                    src={p.url}
-                    alt={p.name}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                    unoptimized
-                  />
+                <div className="relative aspect-[3/4] w-full bg-(--st-surface-alt)">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.url} alt={p.name} className="h-full w-full object-cover" />
                 </div>
-                <div className="p-2">
-                  <div className="truncate text-xs font-medium text-(--st-text)">
-                    {p.name}
-                  </div>
+                <div className="p-2.5">
+                  <div className="truncate text-xs font-medium text-(--st-text)">{p.name}</div>
                   <div className="mt-0.5 text-[11px] text-(--st-text-muted)">
                     {formatBytes(p.size)}
                   </div>
@@ -346,19 +426,16 @@ export function ProductForm({
               </div>
             ))}
           </div>
-        ) : (
-          <div className="mt-3 text-xs text-(--st-text-muted)">
-            Belum ada gambar dipilih.
-          </div>
-        )}
+        ) : null}
       </div>
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-3 border-t border-(--st-border) pt-5">
         <SubmitButton
-          pendingText="Membuat..."
+          pendingText="Menyimpan produk..."
           disabled={categories.length === 0 || Boolean(imageSizeError)}
+          className="h-12 rounded-full bg-[#0D0D0D] px-8 font-mono-label text-xs font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#FF5500]"
         >
-          Buat produk
+          Terbitkan Produk
         </SubmitButton>
       </div>
     </form>

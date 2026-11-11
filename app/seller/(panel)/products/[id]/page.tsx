@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 import { Breadcrumb } from "@/components/seller/breadcrumb";
 import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
-import { Badge } from "@/components/ui/badge";
 import {
   adminDeleteProductImages,
   adminDeleteProductVariants,
@@ -17,10 +18,10 @@ import {
 } from "@/lib/catalog/admin";
 import { uploadProductImage } from "@/lib/catalog/storage";
 import { productUpdateSchema } from "@/lib/catalog/validation";
-
 import { ProductEditForm } from "../_components/product-edit-form";
 
 function publicStorageUrl(storagePath: string) {
+  if (storagePath.startsWith("http")) return storagePath;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const bucket = process.env.SUPABASE_PRODUCT_IMAGES_BUCKET || "product-images";
   if (!url) return "";
@@ -61,15 +62,37 @@ export default async function ProductDetailPage({
     const removedVariantIds = formData.getAll("removed_variant_id").map(String);
     const removedImageIds = formData.getAll("removed_image_id").map(String);
 
+    const origPriceStr = String(formData.get("original_price") ?? "").trim();
+    const originalPriceVal =
+      origPriceStr.length > 0 && Number.isFinite(Number(origPriceStr))
+        ? Number(origPriceStr)
+        : null;
+
+    const rawTags = String(formData.get("style_tags") ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     const values = {
       name: String(formData.get("name") ?? ""),
       slug: String(formData.get("slug") ?? ""),
       category_id: String(formData.get("category_id") ?? ""),
-      description: (String(formData.get("description") ?? "") || null) as
-        | string
-        | null,
+      description: (String(formData.get("description") ?? "").trim() || null) as string | null,
       price: Number(String(formData.get("price") ?? "0")),
+      original_price: originalPriceVal,
       status: String(formData.get("status") ?? "draft") as "draft" | "active",
+      gender: String(formData.get("gender") ?? "unisex") as
+        | "men"
+        | "women"
+        | "unisex"
+        | "accessories",
+      condition: String(formData.get("condition") ?? "").trim() || "Excellent",
+      color: String(formData.get("color") ?? "").trim() || null,
+      material: String(formData.get("material") ?? "").trim() || null,
+      measurements: String(formData.get("measurements") ?? "").trim() || null,
+      badge: String(formData.get("badge") ?? "").trim() || null,
+      style_tags: rawTags,
+      is_featured: formData.get("is_featured") === "on",
       variants: parsedVariants,
       removed_variant_ids: removedVariantIds,
       removed_image_ids: removedImageIds,
@@ -84,17 +107,22 @@ export default async function ProductDetailPage({
       slug: parsed.data.slug,
       description: parsed.data.description ?? null,
       price: parsed.data.price,
+      original_price: parsed.data.original_price ?? null,
       status: parsed.data.status,
+      gender: parsed.data.gender,
+      condition: parsed.data.condition ?? null,
+      color: parsed.data.color ?? null,
+      material: parsed.data.material ?? null,
+      measurements: parsed.data.measurements ?? null,
+      badge: parsed.data.badge ?? null,
+      style_tags: parsed.data.style_tags,
+      is_featured: parsed.data.is_featured,
     });
 
-    // Variants: delete removed, then upsert current.
     await adminDeleteProductVariants(parsed.data.removed_variant_ids);
     await adminUpsertProductVariants(id, parsed.data.variants);
-
-    // Images: delete removed records (MVP: we keep storage object; cleanup can be added later)
     await adminDeleteProductImages(parsed.data.removed_image_ids);
 
-    // Upload new images (optional)
     const files = formData
       .getAll("images")
       .filter((f): f is File => f instanceof File && f.size > 0)
@@ -128,8 +156,18 @@ export default async function ProductDetailPage({
   return (
     <PageShell>
       <PageHeader
-        title="Kelola Produk"
-        badge={<Badge>{product.status === "active" ? "Aktif" : "Draft"}</Badge>}
+        title={product.name}
+        badge={
+          <span
+            className={`rounded-full px-3 py-0.5 font-mono-label text-[10px] font-semibold uppercase tracking-[0.12em] ${
+              product.status === "active"
+                ? "bg-[#0D0D0D] text-white"
+                : "bg-(--st-surface-alt) text-(--st-text-muted)"
+            }`}
+          >
+            {product.status === "active" ? "Aktif" : "Draft"}
+          </span>
+        }
         breadcrumb={
           <Breadcrumb
             items={[
@@ -138,6 +176,18 @@ export default async function ProductDetailPage({
               { label: product.name },
             ]}
           />
+        }
+        right={
+          product.status === "active" ? (
+            <Link
+              href={`/products/${product.slug}`}
+              target="_blank"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-(--st-border) bg-white px-5 font-mono-label text-[11px] font-semibold uppercase tracking-[0.1em] text-(--st-text) transition hover:border-[#FF5500] hover:text-[#FF5500]"
+            >
+              <span>Lihat di Storefront</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          ) : null
         }
       />
 
@@ -151,8 +201,17 @@ export default async function ProductDetailPage({
               slug: product.slug,
               category_id: product.category_id,
               price: product.price,
+              original_price: product.original_price,
               status: product.status,
               description: product.description,
+              gender: product.gender ?? "unisex",
+              condition: product.condition ?? "Excellent",
+              color: product.color,
+              material: product.material,
+              measurements: product.measurements,
+              badge: product.badge,
+              style_tags: product.style_tags ?? [],
+              is_featured: Boolean(product.is_featured),
             },
             variants,
             images: imageItems,

@@ -5,10 +5,13 @@ import { redirect } from "next/navigation";
 import { Breadcrumb } from "@/components/seller/breadcrumb";
 import { PageHeader } from "@/components/seller/page-header";
 import { PageShell } from "@/components/seller/page-shell";
-import { adminCreateProduct, adminInsertProductImages, adminListCategories } from "@/lib/catalog/admin";
+import {
+  adminCreateProduct,
+  adminInsertProductImages,
+  adminListCategories,
+} from "@/lib/catalog/admin";
 import { productSchema } from "@/lib/catalog/validation";
 import { uploadProductImage } from "@/lib/catalog/storage";
-
 import { ProductForm } from "../_components/product-form";
 
 export default async function NewProductPage() {
@@ -30,17 +33,37 @@ export default async function NewProductPage() {
       })
       .filter((v) => v.size_label.length > 0);
 
+    const origPriceStr = String(formData.get("original_price") ?? "").trim();
+    const originalPriceVal =
+      origPriceStr.length > 0 && Number.isFinite(Number(origPriceStr))
+        ? Number(origPriceStr)
+        : null;
+
+    const rawTags = String(formData.get("style_tags") ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     const values = {
       name: String(formData.get("name") ?? ""),
       slug: String(formData.get("slug") ?? ""),
       category_id: String(formData.get("category_id") ?? ""),
-      description: (String(formData.get("description") ?? "") || null) as
-        | string
-        | null,
+      description: (String(formData.get("description") ?? "").trim() || null) as string | null,
       price: Number(String(formData.get("price") ?? "0")),
-      status: (String(formData.get("status") ?? "draft") as
-        | "draft"
-        | "active"),
+      original_price: originalPriceVal,
+      status: String(formData.get("status") ?? "draft") as "draft" | "active",
+      gender: String(formData.get("gender") ?? "unisex") as
+        | "men"
+        | "women"
+        | "unisex"
+        | "accessories",
+      condition: String(formData.get("condition") ?? "").trim() || "Excellent",
+      color: String(formData.get("color") ?? "").trim() || null,
+      material: String(formData.get("material") ?? "").trim() || null,
+      measurements: String(formData.get("measurements") ?? "").trim() || null,
+      badge: String(formData.get("badge") ?? "").trim() || null,
+      style_tags: rawTags,
+      is_featured: formData.get("is_featured") === "on",
       variants,
     };
 
@@ -77,7 +100,8 @@ export default async function NewProductPage() {
   return (
     <PageShell>
       <PageHeader
-        title="Produk Baru"
+        title="Tambah Produk"
+        description="Buat listing baru beserta detail material, pengukuran, harga diskon, varian ukuran, dan foto studio."
         breadcrumb={
           <Breadcrumb
             items={[
@@ -89,7 +113,7 @@ export default async function NewProductPage() {
         }
       />
 
-      <section className="mt-6 rounded-xl border border-(--st-border) bg-white p-6 shadow-[0_4px_16px_rgba(17,24,39,0.04)]">
+      <section className="mt-6 rounded-3xl border border-(--st-border) bg-white p-6 sm:p-8">
         <ProductForm
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}
           action={createProductAction}
